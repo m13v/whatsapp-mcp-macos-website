@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@source "../../node_modules/@m13v/seo-components/src";
+
+:root {
+  --seo-accent: #14b8a6;
+  --seo-accent-light: #2dd4bf;
+  --seo-accent-dark: #0d9488;
+  --seo-accent-rgb: 20, 184, 166;
+  --seo-accent-gradient-from: #06b6d4;
+  --seo-accent-gradient-to: #14b8a6;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #ffffff;
+  color: #09090b;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
