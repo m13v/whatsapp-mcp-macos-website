@@ -9,9 +9,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@m13v/seo-components": "^0.12.1",
+    "@m13v/seo-components": "^0.13.0",
     "@remotion/player": "^4.0.448",
-    "@seo/components": "npm:@m13v/seo-components@^0.12.1",
+    "@seo/components": "npm:@m13v/seo-components@^0.13.0",
     "framer-motion": "^11.18.2",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.469.0",
