@@ -68,7 +68,7 @@ const serverVersionCode = `// Sources/WhatsAppMCP/main.swift
 let server = Server(
   name: "WhatsAppMCP",
   version: "3.0.0",                    // returned by MCP initialize
-  capabilities: .init(tools: .init(listChanged: false))
+  capabilities: .init(tools: .init(listChanged: true))
 )
 // \u2026
 log("setupAndStartServer: defined 11 tools")`;
