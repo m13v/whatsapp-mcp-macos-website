@@ -75,7 +75,7 @@ log("setupAndStartServer: defined 11 tools")`;
 
 const packageJsonCode = `{
   "name": "whatsapp-mcp-macos",
-  "version": "1.1.0",                   // the npm tag; npm list reads this
+  "version": "1.0.1",                   // the npm tag; npm list reads this
   "bin": { "whatsapp-mcp": "bin/whatsapp-mcp" },
   "scripts": {
     "postinstall": "xcrun swift build -c release"
@@ -89,7 +89,7 @@ const terminalAfterUpdate = [
   { type: "output" as const, text: "/\u2026/lib" },
   {
     type: "output" as const,
-    text: "\u2514\u2500\u2500 whatsapp-mcp-macos@1.1.0   # npm thinks we're new",
+    text: "\u2514\u2500\u2500 whatsapp-mcp-macos@1.0.1   # npm thinks we're new",
   },
   {
     type: "command" as const,
@@ -337,7 +337,7 @@ export default function NpmHowToUpdatePackagePage() {
           ratingCount="npm + GitHub signals"
           highlights={[
             "Covers the stdio-child-process case that generic guides skip",
-            "Real commands verified against whatsapp-mcp-macos v1.1.0",
+            "Real commands verified against whatsapp-mcp-macos v1.0.1",
             "Diagrams the MCP initialize handshake so you can verify the update landed",
           ]}
         />
@@ -503,7 +503,7 @@ export default function NpmHowToUpdatePackagePage() {
             </h3>
             <p className="text-zinc-600 leading-relaxed">
               <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">package.json</code> currently
-              publishes <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">&quot;version&quot;: &quot;1.1.0&quot;</code>.
+              publishes <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">&quot;version&quot;: &quot;1.0.1&quot;</code>.
               The MCP server hardcodes <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">version: &quot;3.0.0&quot;</code> in
               <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800"> Sources/WhatsAppMCP/main.swift</code>.
               The first updates every <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">npm publish</code>. The
