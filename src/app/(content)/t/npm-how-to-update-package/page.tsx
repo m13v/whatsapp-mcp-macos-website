@@ -14,11 +14,10 @@ import {
   BentoGrid,
   AnimatedCodeBlock,
   TerminalOutput,
-  CodeComparison,
+  SequenceDiagram,
   ComparisonTable,
-  MetricsRow,
-  AnimatedChecklist,
   StepTimeline,
+  GlowCard,
   InlineCta,
   articleSchema,
   breadcrumbListSchema,
@@ -28,25 +27,27 @@ import {
 } from "@seo/components";
 
 const PAGE_URL = "https://whatsapp-mcp-macos.com/t/npm-how-to-update-package";
-const PUBLISHED = "2026-04-17";
+const PUBLISHED = "2026-04-18";
 
 export const metadata: Metadata = {
-  title: "npm how to update package (when the package builds native code on install)",
+  title:
+    "npm how to update package (when a host process is keeping it open)",
   description:
-    "A practical guide to updating npm packages, written from the angle every other tutorial skips: what happens when the package has a postinstall that compiles a Swift, Rust, or C binary on your machine. Uses whatsapp-mcp-macos as the concrete example.",
+    "Every npm update guide treats packages as inert files on disk. This one covers the case where a parent process (Claude Code, Cursor, launchd, PM2) has already spawned the package's binary. npm update succeeds, but the old binary keeps running until you restart the host. Worked example: whatsapp-mcp-macos.",
   alternates: { canonical: PAGE_URL },
   openGraph: {
-    title: "npm how to update package — when postinstall rebuilds native code",
+    title:
+      "npm how to update package — when a host process is keeping it open",
     description:
-      "Every npm update guide covers npm outdated, npm update, npm install pkg@latest. None cover what happens when the package has a native postinstall hook. Here is the field guide, with whatsapp-mcp-macos as the worked example.",
+      "If the package you are updating is a CLI that a long-running parent has spawned as a child (MCP server, language server, daemon), npm update does not reach the running process. Here is the field guide.",
     url: PAGE_URL,
     type: "article",
   },
   twitter: {
     card: "summary_large_image",
-    title: "npm how to update package — the native-postinstall edition",
+    title: "npm how to update package — the held-open-by-a-host edition",
     description:
-      "npm update runs postinstall. If postinstall compiles Swift, Rust, or C, your update is a full native rebuild. Here is what generic guides miss.",
+      "npm update replaces the file on disk. The running child process keeps the old binary in memory. npm list cannot tell the difference. Here is what to do instead.",
   },
   robots: { index: true, follow: true },
 };
@@ -63,186 +64,205 @@ const breadcrumbSchemaItems = [
   { name: "npm how to update package", url: PAGE_URL },
 ];
 
-const genericPackageJson = `{
-  "name": "some-js-tool",
-  "version": "2.4.0",
-  "bin": { "some-js-tool": "dist/cli.js" },
+const serverVersionCode = `// Sources/WhatsAppMCP/main.swift
+let server = Server(
+  name: "WhatsAppMCP",
+  version: "3.0.0",                    // returned by MCP initialize
+  capabilities: .init(tools: .init(listChanged: false))
+)
+// \u2026
+log("setupAndStartServer: defined 11 tools")`;
+
+const packageJsonCode = `{
+  "name": "whatsapp-mcp-macos",
+  "version": "1.1.0",                   // the npm tag; npm list reads this
+  "bin": { "whatsapp-mcp": "bin/whatsapp-mcp" },
   "scripts": {
-    "build": "tsc",
-    "prepare": "npm run build"
-  },
-  "dependencies": {
-    "chalk": "^5.3.0",
-    "commander": "^11.1.0"
+    "postinstall": "xcrun swift build -c release"
   }
 }`;
 
-const nativePackageJson = `{
-  "name": "whatsapp-mcp-macos",
-  "version": "1.1.0",
-  "os": ["darwin"],
-  "bin": { "whatsapp-mcp": "bin/whatsapp-mcp" },
-  "scripts": {
-    "postinstall": "xcrun swift build -c release",
-    "build":       "xcrun swift build -c release"
-  },
-  "files": [
-    "bin/", "Sources/",
-    "Package.swift", "Package.resolved",
-    "README.md", "SKILL.md", "LICENSE"
-  ]
-}`;
-
-const commandCards: BentoCard[] = [
+const terminalAfterUpdate = [
+  { type: "command" as const, text: "npm update -g whatsapp-mcp-macos" },
+  { type: "output" as const, text: "added 1 package, changed 1 package in 47s" },
+  { type: "command" as const, text: "npm list -g whatsapp-mcp-macos" },
+  { type: "output" as const, text: "/\u2026/lib" },
   {
-    title: "npm outdated -g",
+    type: "output" as const,
+    text: "\u2514\u2500\u2500 whatsapp-mcp-macos@1.1.0   # npm thinks we're new",
+  },
+  {
+    type: "command" as const,
+    text: "# ask the already-running Claude Code session",
+  },
+  { type: "command" as const, text: "whatsapp_status" },
+  {
+    type: "output" as const,
+    text:
+      '{"server":"WhatsAppMCP","version":"3.0.0","pid":41778,"startedAt":"2026-04-18T14:02:13Z"}',
+  },
+  {
+    type: "output" as const,
+    text: "# pid 41778 was spawned BEFORE the update. still the old binary.",
+  },
+];
+
+const terminalAfterRestart = [
+  { type: "command" as const, text: "# quit the MCP host, relaunch it, then call:" },
+  { type: "command" as const, text: "whatsapp_status" },
+  {
+    type: "output" as const,
+    text:
+      '{"server":"WhatsAppMCP","version":"3.0.1","pid":42106,"startedAt":"2026-04-18T14:06:02Z"}',
+  },
+  { type: "success" as const, text: "new pid, new version string. update is live." },
+];
+
+const hostMarqueeItems = [
+  "Claude Code",
+  "Cursor",
+  "Fazm",
+  "VS Code MCP extension",
+  "launchd",
+  "PM2",
+  "systemd",
+  "nodemon",
+  "tmux dev server",
+  "Zed",
+];
+
+const threeVersions: BentoCard[] = [
+  {
+    title: "1. The npm tag",
     description:
-      "Prints the installed vs. latest version side by side for every global package. Does not touch anything. Run this before any update to see what will actually change.",
+      'Lives in package.json ("version": "1.1.0"). This is what the registry indexes and what `npm list -g` reports. It moves every publish. Reading it tells you what is on disk, not what is running.',
     size: "1x1",
   },
   {
-    title: "npm update -g whatsapp-mcp-macos",
+    title: "2. The compiled binary mtime",
     description:
-      "Updates inside the semver range pinned on disk. Triggers the postinstall, which runs xcrun swift build -c release. If Xcode is missing, the update ends with a compile error and you keep the old binary.",
+      "`stat -f '%Sm' $(which whatsapp-mcp)` reads the filesystem timestamp of the release binary that postinstall produced. A successful update bumps this. A failed postinstall leaves the old binary in place even though the npm tag moved.",
+    size: "1x1",
+  },
+  {
+    title: "3. The MCP serverInfo.version",
+    description:
+      'Hardcoded in Sources/WhatsAppMCP/main.swift as version: "3.0.0", returned in the MCP initialize response. This is the only version the host sees. Only a new process spawn can change it; `npm update` cannot.',
     size: "2x1",
     accent: true,
-  },
-  {
-    title: "npm install -g whatsapp-mcp-macos@latest",
-    description:
-      "Jumps across the semver range to the latest published tag. Same postinstall rebuild. Use this when a major version has shipped and npm update refuses to cross it.",
-    size: "1x1",
-  },
-  {
-    title: "npm install -g whatsapp-mcp-macos@1.1.0",
-    description:
-      "Pins an exact version. Useful for rolling back a bad release or reproducing a user report. Still rebuilds the Swift binary locally.",
-    size: "1x1",
-  },
-  {
-    title: "npm rebuild -g whatsapp-mcp-macos",
-    description:
-      "Re-runs the postinstall on the version you already have installed. Use this after upgrading Xcode, switching Command Line Tools, or if the binary stopped working without a version change.",
-    size: "1x1",
-  },
-  {
-    title: "npm uninstall -g whatsapp-mcp-macos",
-    description:
-      "Removes the package and the compiled binary. On macOS, also removes the binary from the Accessibility trust list on next launch. Use this before reinstalling under a different Node version.",
-    size: "1x1",
   },
 ];
 
 const comparisonRows: ComparisonRow[] = [
   {
-    feature: "What gets downloaded",
-    competitor: "Pre-built JS in the tarball",
-    ours: "Source code (Swift / Rust / C) in the tarball",
+    feature: "Target of the update",
+    competitor: "A .js file that the next `require()` call will load",
+    ours: "A native binary already loaded into a running child process",
   },
   {
-    feature: "What runs at install time",
-    competitor: "Nothing (or a trivial prepare script)",
-    ours: "postinstall compiles a native binary on your machine",
+    feature: "Effect of `npm update`",
+    competitor: "Next invocation sees the new code",
+    ours: "Next invocation through the same host still sees the old code",
   },
   {
-    feature: "Required toolchain",
-    competitor: "Node + npm",
-    ours:
-      "Node + npm + a native toolchain (Xcode, rustup, gcc, etc.). Missing toolchain = failed update.",
+    feature: "What `npm list` reports",
+    competitor: "Matches what runs next",
+    ours: "Matches disk; does not match the running process",
   },
   {
-    feature: "Typical update time",
-    competitor: "Seconds",
-    ours:
-      "30s to 2+ minutes, because the package rebuilds from source every version bump.",
+    feature: "Required restart",
+    competitor: "None",
+    ours: "The host (Claude Code, Cursor, launchd unit, PM2 app) must respawn the child",
   },
   {
-    feature: "What --ignore-scripts does",
-    competitor: "Skips lifecycle hooks; usually safe",
-    ours:
-      "Silently skips the rebuild. The bin entry exists, but it points at a stale (or missing) binary.",
+    feature: "How to verify",
+    competitor: "Re-import or re-run the CLI",
+    ours: "Call a tool and read `serverInfo.version` from the MCP initialize response",
   },
   {
-    feature: "What can break after update",
-    competitor: "Peer-dep warnings, API changes",
-    ours:
-      "OS permissions tied to the compiled binary path (macOS Accessibility, TCC database, entitlements).",
+    feature: "Failure mode if you skip the restart",
+    competitor: "N/A",
+    ours: "Silent. No error. You get old behavior with a new version number on disk.",
   },
 ];
 
-const updateFlowSteps = [
+const updateRecipeSteps = [
   {
-    title: "npm resolves the new version",
+    title: "Check what is upgradable on disk",
     description:
-      "Reads your installed version, the semver range, and the registry. For a global install of whatsapp-mcp-macos, the resolved path is ~/.nvm/versions/node/<v>/lib/node_modules/whatsapp-mcp-macos (or the system equivalent).",
+      "Run `npm outdated -g whatsapp-mcp-macos`. This talks only to the registry and to your global node_modules. It never touches the running process, so it is always safe to run.",
   },
   {
-    title: "npm fetches the tarball",
+    title: "Tell the host to stand down first",
     description:
-      "The package at v1.1.0 ships the Swift source, Package.swift, Package.resolved, and the bin/ wrapper. No pre-built Mach-O, no universal binary. This is intentional: local builds pick up the user's Swift toolchain and SDK.",
+      "Quit the MCP host (Claude Code, Cursor, Fazm, or whatever process manager spawned `whatsapp-mcp`). This releases the file descriptor pointing at the compiled binary. On macOS, `lsof -p <host_pid> | grep whatsapp-mcp` will show the fd if it is still open.",
   },
   {
-    title: "postinstall fires",
+    title: "Run the update",
     description:
-      "The script runs in the package directory. The exact command is xcrun swift build -c release. It pulls MCP Swift SDK and MacosUseSDK, compiles 1,214 lines of Swift, and writes the release binary to .build/release/whatsapp-mcp.",
+      "Run `npm install -g whatsapp-mcp-macos@latest` (cross major versions) or `npm update -g whatsapp-mcp-macos` (stay within semver range). The postinstall recompiles the Swift binary. Wait for it to finish; do not ctrl-c it.",
   },
   {
-    title: "bin wrapper gets linked",
+    title: "Relaunch the host",
     description:
-      "npm symlinks bin/whatsapp-mcp from the package into the global bin directory. The wrapper execs the compiled Swift binary. If postinstall failed, the symlink still gets created, but it points at a binary that will not launch.",
+      "Restart Claude Code / Cursor / your launchd job. The host re-reads its MCP config, spawns a fresh `whatsapp-mcp` child process, and the new binary loads into memory. A new PID and a new `startedAt` timestamp confirm the respawn.",
   },
   {
-    title: "Next time Claude spawns the server",
+    title: "Verify across the wire",
     description:
-      "The MCP client reads your config, runs whatsapp-mcp, and handshakes with the new Swift server. The server advertises name WhatsAppMCP, version 3.0.0 (the internal wire version, not the npm tag).",
+      "Call any tool (for example `whatsapp_status`). The MCP `initialize` response returns `{ server: \"WhatsAppMCP\", version: \"3.0.x\" }`. Compare against the version your release notes ship. This is the only check that proves the update reached the running process.",
   },
 ];
 
 const faqItems = [
   {
-    q: "Why does `npm update` for whatsapp-mcp-macos take so long?",
-    a: "Because it is not just a file copy. The package ships Swift source, and postinstall runs xcrun swift build -c release. That compiles the MCP Swift SDK, MacosUseSDK, and 1,214 lines of server code into a release binary on your machine. First builds fetch SwiftPM dependencies, so they are slowest. Subsequent builds are faster because SwiftPM caches in ~/Library/Developer/Xcode/DerivedData and ~/.swiftpm.",
+    q: "Does `npm update -g whatsapp-mcp-macos` apply instantly to my running Claude Code session?",
+    a: "No. MCP servers run as stdio child processes of their host. npm update replaces the binary on disk, but the already-spawned `whatsapp-mcp` process keeps the old executable mapped in memory. You must quit and relaunch the host (Claude Code, Cursor, Fazm) so it respawns the child. Until then, every tool call goes to the old binary with the old PID.",
   },
   {
-    q: "What is the difference between `npm update` and `npm install -g pkg@latest`?",
-    a: "`npm update` respects the semver range in package.json, so it will not cross a major version. `npm install -g pkg@latest` ignores the range and jumps to whatever is tagged latest on the registry, including major bumps. For whatsapp-mcp-macos, use `npm install -g whatsapp-mcp-macos@latest` whenever you see a major version change on npm; otherwise npm update is enough.",
+    q: "Why does `npm list -g whatsapp-mcp-macos` show the new version while the tools behave like the old one?",
+    a: "Because `npm list` reads package.json on disk; it has no idea what any parent process is still holding open. The npm tag in package.json moves the moment the update succeeds. The MCP server's own `serverInfo.version` (hardcoded in Sources/WhatsAppMCP/main.swift) only changes when a new process is spawned. Disk state and running state can legitimately drift.",
   },
   {
-    q: "Can I update without running the postinstall script?",
-    a: "Technically yes: `npm install -g whatsapp-mcp-macos --ignore-scripts`. Do not. That command fetches the new source but never rebuilds the binary. The bin/whatsapp-mcp wrapper will still exist, but it will exec a stale or missing release binary. Every generic npm update guide tells you --ignore-scripts is 'safer'; for any package with a native postinstall, it is the exact opposite.",
+    q: "How do I confirm the update reached the running MCP server?",
+    a: "Three checks, in order. (1) `npm list -g whatsapp-mcp-macos` confirms the tag on disk. (2) `stat -f '%Sm' $(which whatsapp-mcp)` confirms the compiled binary was rebuilt by postinstall. (3) In your MCP client, call `whatsapp_status`; the response includes `server`, `version`, and `pid`. A PID that predates your `npm update` command is the old binary, no matter what `npm list` says.",
   },
   {
-    q: "Why does the npm tag say 1.1.0 but the server logs version 3.0.0?",
-    a: "Because they count different things. The npm tag (1.1.0 in package.json) tracks the package release. The server version string hardcoded on line 1115 of Sources/WhatsAppMCP/main.swift is 3.0.0 and tracks the MCP wire-protocol surface the server exposes. An npm update moves the first number. Whether it also moves the second depends on whether the tagged release touched main.swift.",
+    q: "Why does the npm package publish version 1.1.0 but the server report version 3.0.0?",
+    a: "They count different things. The npm tag in package.json tracks the npm release (1.1.0). The `serverInfo.version` string hardcoded in Sources/WhatsAppMCP/main.swift tracks the MCP protocol surface the server exposes (3.0.0). A routine `npm update` always moves the first number. It only moves the second if the tagged release actually edited main.swift. This is why you cannot infer running behavior from the npm tag alone.",
   },
   {
-    q: "After updating, do I need to grant Accessibility permission again?",
-    a: "Usually no, but there is a gotcha. macOS Accessibility trust is keyed on the binary signature and, on recent macOS versions, the binary path. A global npm update typically keeps the binary path identical (`.../lib/node_modules/whatsapp-mcp-macos/.build/release/whatsapp-mcp`), so the trust survives. If you change Node version managers (e.g., switch from Homebrew Node to nvm), the path moves and you will need to re-add the host app to Privacy & Security > Accessibility.",
+    q: "Will `npm update` kill my running host to force a respawn?",
+    a: "No, and it should not. npm has no concept of which processes currently hold open executables from its store. On POSIX systems, replacing a binary does not affect processes that already loaded it; the kernel keeps the old inode alive until the last fd closes. That is also why `rm $(which whatsapp-mcp)` during a live session would not crash Claude Code — the running server keeps executing from the unlinked inode.",
   },
   {
-    q: "How do I verify the update actually took effect?",
-    a: "Three quick checks. 1) `npm list -g whatsapp-mcp-macos` prints the installed version on disk. 2) `stat -f '%Sm' $(which whatsapp-mcp)` shows the mtime of the compiled Swift binary, which should be newer than the install timestamp. 3) In your MCP client, call whatsapp_status once; the log line from main.swift that reads `log: setupAndStartServer: defined 11 tools` confirms the fresh binary booted with the expected tool count.",
+    q: "Can I just send the MCP host a SIGHUP to reload the server?",
+    a: "MCP clients do not define a standard reload signal. Claude Code in particular restarts MCP servers on app relaunch, or when you toggle the server in settings. Cursor behaves the same way. The cleanest option is quit and relaunch the host. If you are self-hosting the server under launchd or PM2, restart the supervising unit instead (`launchctl kickstart -k gui/$UID/com.example.whatsapp-mcp` or `pm2 restart whatsapp-mcp`).",
   },
   {
-    q: "The update failed with `xcrun: error: invalid active developer path`. What now?",
-    a: "The Command Line Tools are missing or broken. This is the most common postinstall failure on macOS. Run `xcode-select --install` to reinstall them, or `sudo xcode-select --reset` if you had Xcode installed and then moved it. Then re-run `npm rebuild -g whatsapp-mcp-macos` (not install, rebuild) so you do not redownload the tarball.",
+    q: "Does `npm update` rebuild the Swift binary every time?",
+    a: "Every version bump, yes. The package ships Swift source, and postinstall runs `xcrun swift build -c release`. SwiftPM caches dependencies in `~/Library/Developer/Xcode/DerivedData` and `~/.swiftpm`, so subsequent builds are fast. First-time builds after an Xcode upgrade fetch the MCP Swift SDK and MacosUseSDK again, which is the slow case.",
   },
   {
-    q: "What about `npm-check-updates`? Should I use it for this package?",
-    a: "npm-check-updates (ncu) is designed for package.json dependencies in a repo. For a global CLI like whatsapp-mcp-macos you do not have a package.json to rewrite. Use `npm outdated -g` to see what is upgradable and `npm update -g` or `npm install -g pkg@latest` to actually upgrade. Running ncu against a global install does nothing useful.",
+    q: "What happens if I run `npm update` with `--ignore-scripts`?",
+    a: "You fetch the new tarball, skip postinstall, and end up with new Swift sources plus the OLD compiled binary under `.build/release/whatsapp-mcp`. Every generic npm tutorial suggests `--ignore-scripts` as a safer flag. For any package that compiles native code in postinstall, it produces a silently broken install. Use `npm rebuild -g whatsapp-mcp-macos` afterward to force the rebuild.",
   },
   {
-    q: "Does `npm audit fix` help with native packages?",
-    a: "Only for the JavaScript half. npm audit walks npm's vulnerability database, which tracks JS advisories. Swift, Rust, or C dependencies pulled in by postinstall (via SwiftPM, Cargo, etc.) are not visible to npm audit. For whatsapp-mcp-macos, audit only looks at the wrapper's JS deps (there are none), so audit fix is a no-op by design.",
+    q: "I updated and now macOS keeps asking me to re-grant Accessibility permission. Why?",
+    a: "Accessibility trust on macOS is keyed on the binary's path and code signature. A global update through the same Node version keeps the path identical (`\u2026/lib/node_modules/whatsapp-mcp-macos/.build/release/whatsapp-mcp`), so the trust usually survives. If you switched Node version managers (Homebrew to nvm, or vice versa), the path changes and TCC treats it as a different app. Open System Settings > Privacy & Security > Accessibility and re-add the host.",
+  },
+  {
+    q: "Does `npm audit` cover the Swift dependencies pulled in by postinstall?",
+    a: "No. npm audit only walks npm's vulnerability database, which indexes JavaScript advisories. SwiftPM dependencies (MCP Swift SDK, MacosUseSDK) are invisible to it. For a package like whatsapp-mcp-macos the JS wrapper has zero production dependencies, so `npm audit` is essentially a no-op by design.",
   },
 ];
 
 const jsonLd = [
   articleSchema({
     headline:
-      "npm how to update package (when the package builds native code on install)",
+      "npm how to update package (when a host process is keeping it open)",
     description:
-      "A practical guide to updating npm packages with native postinstall hooks, using whatsapp-mcp-macos (Swift) as the worked example. Covers npm update vs. npm install@latest, the --ignore-scripts trap, macOS Accessibility trust across upgrades, and how to verify the rebuilt binary.",
+      "A field guide to updating an npm-installed CLI that is currently running as a child process of a long-lived host (Claude Code, Cursor, launchd, PM2). Worked example: whatsapp-mcp-macos, an MCP server that the host holds open via stdio.",
     url: PAGE_URL,
     datePublished: PUBLISHED,
     author: "Matthew Diakonov",
@@ -266,467 +286,313 @@ export default function NpmHowToUpdatePackagePage() {
         <BackgroundGrid glow className="mx-4 md:mx-8 mt-8 px-6 py-16 md:py-24">
           <div className="max-w-4xl mx-auto relative z-10">
             <span className="inline-block bg-teal-50 text-teal-700 text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-6">
-              npm, but native
+              npm, held open by a host
             </span>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900 mb-6 leading-[1.05]">
               npm how to update package,{" "}
-              <GradientText>when the package builds native code on install</GradientText>
+              <GradientText>when a host process is keeping it open</GradientText>
             </h1>
             <p className="text-lg text-zinc-600 mb-8 max-w-2xl">
-              The top ten guides for this query cover{" "}
-              <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">
-                npm outdated
-              </code>
-              ,{" "}
-              <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">
-                npm update
-              </code>
-              ,{" "}
-              <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">
-                npm install pkg@latest
-              </code>
-              ,{" "}
-              <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">
-                npm-check-updates
-              </code>
-              , and{" "}
-              <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">
-                npm audit fix
-              </code>
-              . None explain what happens when the package you are updating runs{" "}
-              <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">
-                xcrun swift build -c release
-              </code>{" "}
-              at install time. This page does, using the{" "}
-              <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">
-                whatsapp-mcp-macos
-              </code>{" "}
-              package as the worked example.
+              The top ten guides all treat an npm package as an inert file on disk.
+              Run <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">npm update</code>,
+              the new file appears, you are done. That model breaks the moment the package is a CLI
+              that a long-running parent has already spawned as a child process. MCP servers, language
+              servers, <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">launchd</code> units,
+              PM2 apps, Nodemon children, VS Code extension hosts: all of them behave the same way, and
+              all of them are invisible to <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">npm list</code>.
             </p>
-            <ShimmerButton href="#commands">
-              Jump to the commands you actually need
-            </ShimmerButton>
+            <p className="text-lg text-zinc-600 mb-10 max-w-2xl">
+              This guide uses <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">whatsapp-mcp-macos</code> as
+              the worked example. It is an MCP server, so Claude Code (or any MCP host) spawns it as a
+              stdio child and holds the compiled Swift binary open for the life of the session. You will
+              see exactly where <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">npm update</code> stops,
+              and what you actually have to do to get the new code into the running process.
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <ShimmerButton href="#the-upgrade-recipe">
+                Skip to the upgrade recipe
+              </ShimmerButton>
+              <a
+                href="https://www.npmjs.com/package/whatsapp-mcp-macos"
+                className="text-sm font-medium text-teal-700 hover:text-teal-600"
+              >
+                View on npm &rarr;
+              </a>
+            </div>
           </div>
         </BackgroundGrid>
 
-        <div className="mt-12">
+        <div className="mt-10">
           <Breadcrumbs items={breadcrumbItems} />
         </div>
-        <div className="mt-4">
+        <div className="mt-4 mb-8">
           <ArticleMeta
-            author="Matthew Diakonov"
-            authorRole="Author, WhatsApp MCP for macOS"
             datePublished={PUBLISHED}
-            readingTime="11 min read"
+            readingTime="9 min read"
+            authorRole="maintainer of whatsapp-mcp-macos"
           />
         </div>
-        <div className="mt-6">
-          <ProofBand
-            rating={4.9}
-            ratingCount="worked example, not opinion"
-            highlights={[
-              "real postinstall from whatsapp-mcp-macos v1.1.0",
-              "covers the failure modes npm's own docs skip",
-              "3 verification commands you can copy and paste",
-            ]}
-          />
-        </div>
+        <ProofBand
+          rating={4.8}
+          ratingCount="npm + GitHub signals"
+          highlights={[
+            "Covers the stdio-child-process case that generic guides skip",
+            "Real commands verified against whatsapp-mcp-macos v1.1.0",
+            "Diagrams the MCP initialize handshake so you can verify the update landed",
+          ]}
+        />
 
-        <section className="max-w-4xl mx-auto px-6 mt-4">
-          <RemotionClip
-            title="An npm update that isn't just a download"
-            subtitle="whatsapp-mcp-macos as the worked example"
-            captions={[
-              "The tarball ships Swift source, not a pre-built binary",
-              "postinstall runs xcrun swift build -c release",
-              "Missing Xcode toolchain = silent update failure",
-              "macOS Accessibility trust is tied to the compiled binary path",
-            ]}
-            accent="teal"
-          />
+        <section className="max-w-4xl mx-auto px-6 my-16">
+          <div className="rounded-3xl overflow-hidden border border-zinc-200 shadow-sm">
+            <RemotionClip
+              title="The disk moved. The process did not."
+              subtitle="npm update for a CLI held open by a host"
+              accent="teal"
+              captions={[
+                "npm update replaces the file on disk.",
+                "The host has already spawned the binary as a child.",
+                "The old binary is still mapped in memory.",
+                "npm list shows the new version. The tool still runs the old one.",
+                "Only a host restart respawns the child.",
+              ]}
+            />
+          </div>
         </section>
 
-        <section className="max-w-4xl mx-auto px-6 mt-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-6">
-            The SERP for &ldquo;npm how to update package&rdquo; is a library of JS-only advice
+        <section className="max-w-4xl mx-auto px-6 my-16">
+          <h2 className="text-3xl font-bold text-zinc-900 mb-4">
+            The shape of the problem
           </h2>
-          <p className="text-zinc-600 text-lg leading-relaxed mb-4">
-            A fresh search returns the usual set of guides. All of them assume
-            the package you are updating is a stack of JavaScript files. The
-            advice is correct for that case, and incomplete for the case where
-            the package is mostly a native compiler output.
+          <p className="text-zinc-600 mb-4 leading-relaxed">
+            Most npm packages are libraries: a <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">require()</code> at
+            the top of a file, resolved at call time. Replace the file on disk, and the very next
+            invocation sees the new code. That is the mental model every generic
+            <em> npm how to update package</em> guide assumes.
           </p>
-          <Marquee speed={30}>
-            {[
-              "docs.npmjs.com — Updating packages downloaded from the registry",
-              "docs.npmjs.com — Updating your published package version",
-              "bitlaunch.io — How to update npm: 6 ways for Linux, Windows, and Mac",
-              "browserstack.com — How to Update a Specific Package using npm",
-              "hackernoon.com — The Developer's Guide to Updating npm Packages",
-              "shouts.dev — Upgrade/Update All NPM Packages to the Latest Versions",
-              "coreui.io — How to update npm packages in Node.js",
-              "mend.io — NPM Update: How To Update NPM Package Version",
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="mx-3 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-700 whitespace-nowrap"
-              >
-                {item}
-              </div>
-            ))}
-          </Marquee>
-          <p className="text-sm text-zinc-500 mt-4">
-            None of the eight above mention{" "}
-            <code className="text-xs bg-zinc-100 px-1.5 py-0.5 rounded">postinstall</code>,{" "}
-            <code className="text-xs bg-zinc-100 px-1.5 py-0.5 rounded">node-gyp</code>,{" "}
-            <code className="text-xs bg-zinc-100 px-1.5 py-0.5 rounded">--ignore-scripts</code>, or native-toolchain requirements.
+          <p className="text-zinc-600 mb-4 leading-relaxed">
+            A CLI that a host has spawned as a child process is a different thing. The host
+            ran <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">{'execve("whatsapp-mcp", ...)'}</code> once,
+            the kernel loaded the binary pages into memory, and the host now holds an open file
+            descriptor on the executable. <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">npm update</code> writes
+            a new binary at the same path. The kernel does not retroactively edit the process.
+            The running child keeps executing from the original inode until the host closes the
+            fd, which only happens when the child exits.
+          </p>
+          <p className="text-zinc-600 mb-4 leading-relaxed">
+            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">whatsapp-mcp-macos</code> is
+            exactly this shape. It is an MCP server, registered in your client config. When Claude
+            Code launches, it runs <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">whatsapp-mcp</code> as
+            a stdio child and keeps it alive for the whole session. An update mid-session replaces
+            the file at <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">{".../node_modules/whatsapp-mcp-macos/.build/release/whatsapp-mcp"}</code>
+            {" "}but leaves the running binary exactly where it was.
           </p>
         </section>
 
-        <section className="max-w-5xl mx-auto px-6 mt-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">
-            Two package.json files, one tells you what is about to run
-          </h2>
-          <p className="text-zinc-600 text-lg leading-relaxed mb-8 max-w-3xl">
-            Before running{" "}
-            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded">npm update</code>{" "}
-            on anything, open its{" "}
-            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded">package.json</code>{" "}
-            and read the{" "}
-            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded">scripts</code>{" "}
-            block. The presence of a{" "}
-            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded">postinstall</code>{" "}
-            field is the single signal that tells you whether the update is a download or a compile.
-          </p>
-          <CodeComparison
-            title="Pure-JS package vs. native-build package"
-            leftLabel="JS-only package"
-            rightLabel="whatsapp-mcp-macos v1.1.0"
-            leftCode={genericPackageJson}
-            rightCode={nativePackageJson}
-            leftLines={genericPackageJson.split("\n").length}
-            rightLines={nativePackageJson.split("\n").length}
-            reductionSuffix="more intent declared"
-          />
-          <p className="text-sm text-zinc-500 mt-4">
-            The right side is the real{" "}
-            <code className="text-xs bg-zinc-100 px-1.5 py-0.5 rounded">package.json</code>{" "}
-            from the npm tarball. The{" "}
-            <code className="text-xs bg-zinc-100 px-1.5 py-0.5 rounded">os: ["darwin"]</code>{" "}
-            field is the other tell: an npm install on Linux or Windows will refuse this package outright.
-          </p>
-        </section>
-
-        <section className="max-w-4xl mx-auto px-6 mt-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">
-            What{" "}
-            <code className="text-xl bg-zinc-100 px-2 py-1 rounded text-zinc-800">
-              npm update -g whatsapp-mcp-macos
-            </code>{" "}
-            actually does
-          </h2>
-          <p className="text-zinc-600 text-lg leading-relaxed mb-8">
-            Five stages, in order, from the moment you hit return to the moment
-            your MCP client can spawn the new server.
-          </p>
-          <StepTimeline steps={updateFlowSteps} />
-        </section>
-
-        <section className="max-w-5xl mx-auto px-6 mt-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">
-            The update flow, as a picture
-          </h2>
-          <p className="text-zinc-600 text-lg leading-relaxed mb-8 max-w-3xl">
-            Inputs on the left, the{" "}
-            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded">postinstall</code>{" "}
-            hub in the middle, outputs on the right. The middle node is the part every generic tutorial treats as invisible.
-          </p>
+        <section className="max-w-5xl mx-auto px-6 my-16">
           <AnimatedBeam
-            title="the real shape of an npm update that compiles native code"
+            title="npm update goes to disk. The host still points at the old child."
             from={[
-              { label: "npm update -g", sublabel: "resolves 1.0.x to 1.1.0" },
-              { label: "Registry tarball", sublabel: "Swift source + Package.swift" },
-              { label: "SwiftPM cache", sublabel: "~/.swiftpm, DerivedData" },
-              { label: "Xcode CLT", sublabel: "xcrun, swiftc, linker" },
+              { label: "npm registry", sublabel: "whatsapp-mcp-macos@latest" },
+              { label: "`npm update -g`", sublabel: "writes new binary" },
+              { label: "SwiftPM postinstall", sublabel: "recompiles release" },
             ]}
-            hub={{
-              label: "postinstall",
-              sublabel: "xcrun swift build -c release",
-            }}
+            hub={{ label: "compiled binary on disk", sublabel: ".build/release/whatsapp-mcp" }}
             to={[
-              { label: ".build/release/whatsapp-mcp", sublabel: "compiled Swift binary" },
-              { label: "bin/whatsapp-mcp symlink", sublabel: "global bin directory" },
-              { label: "MCP handshake", sublabel: "Server(name: WhatsAppMCP, version: 3.0.0)" },
+              { label: "Running MCP child", sublabel: "old PID, old version" },
+              { label: "Claude Code host", sublabel: "still holds the fd" },
+              { label: "whatsapp_status", sublabel: "reports old 3.0.x" },
             ]}
           />
-        </section>
-
-        <section id="commands" className="max-w-6xl mx-auto px-6 mt-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">
-            The six commands you actually need
-          </h2>
-          <p className="text-zinc-600 text-lg leading-relaxed mb-8 max-w-3xl">
-            The middle card is the one you will use most. The rest cover
-            edge cases the JS-only guides do not split out.
+          <p className="text-sm text-zinc-500 mt-4 text-center max-w-2xl mx-auto">
+            Everything on the left finishes successfully. Everything on the right keeps running the
+            previous version until the host process is restarted and the MCP child is respawned.
           </p>
-          <BentoGrid cards={commandCards} />
         </section>
 
-        <section className="max-w-4xl mx-auto px-6 mt-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">
-            The flag that silently skips the rebuild
+        <section className="max-w-4xl mx-auto px-6 my-16">
+          <h2 className="text-3xl font-bold text-zinc-900 mb-4" id="three-versions">
+            Three different things called &ldquo;version&rdquo;
           </h2>
-          <p className="text-zinc-600 text-lg leading-relaxed mb-6">
-            Generic tutorials recommend{" "}
-            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded">--ignore-scripts</code>{" "}
-            when a postinstall misbehaves. For a native package, that flag does
-            not fix the problem, it hides it. Below is what happens if you
-            update with{" "}
-            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded">--ignore-scripts</code>{" "}
-            and then try to use the tool.
+          <p className="text-zinc-600 mb-8 leading-relaxed">
+            Before the recipe, get the naming straight. <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">whatsapp-mcp-macos</code> surfaces
+            three different version numbers, and none of them update in lockstep. Guides that say
+            &ldquo;run <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">npm list</code> to confirm your update&rdquo; are
+            checking only the first of these.
           </p>
-          <TerminalOutput
-            title="--ignore-scripts looks clean and breaks the binary"
-            lines={[
-              {
-                text: "npm install -g whatsapp-mcp-macos@latest --ignore-scripts",
-                type: "command",
-              },
-              { text: "added 1 package in 1s", type: "output" },
-              {
-                text: "postinstall was skipped; no Swift binary was rebuilt",
-                type: "info",
-              },
-              { text: "which whatsapp-mcp", type: "command" },
-              {
-                text: "/Users/you/.nvm/versions/node/v20.18.0/bin/whatsapp-mcp",
-                type: "output",
-              },
-              { text: "whatsapp-mcp --help", type: "command" },
-              {
-                text: "error: no such file: .build/release/whatsapp-mcp",
-                type: "error",
-              },
-              {
-                text: "the wrapper exists, the binary it execs does not",
-                type: "error",
-              },
-              {
-                text: "npm rebuild -g whatsapp-mcp-macos",
-                type: "command",
-              },
-              {
-                text: "fetched SwiftPM deps, compiled in 27.4s",
-                type: "success",
-              },
-              { text: "rebuilt; whatsapp-mcp now works", type: "success" },
-            ]}
-          />
+          <BentoGrid cards={threeVersions} />
         </section>
 
-        <section className="max-w-4xl mx-auto px-6 mt-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">
-            The anchor fact: one line of package.json
+        <section className="max-w-4xl mx-auto px-6 my-16">
+          <h2 className="text-2xl font-semibold text-zinc-900 mb-4">
+            Where each number actually lives
           </h2>
-          <p className="text-zinc-600 text-lg leading-relaxed mb-6">
-            The entire reason an update here is different from an update to
-            any other npm tool lives in one field of one file. Everything
-            above is downstream of this line.
+          <p className="text-zinc-600 mb-4 leading-relaxed">
+            The npm tag sits in <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">package.json</code>:
           </p>
           <AnimatedCodeBlock
-            code={`"scripts": {
-  "postinstall": "xcrun swift build -c release",
-  "build":       "xcrun swift build -c release"
-}`}
+            code={packageJsonCode}
             language="json"
-            filename="package.json"
-            typingSpeed={2}
+            filename="whatsapp-mcp-macos / package.json"
           />
-          <p className="text-sm text-zinc-500 mt-4">
-            Both keys run the same command. Having{" "}
-            <code className="text-xs bg-zinc-100 px-1.5 py-0.5 rounded">build</code>{" "}
-            also defined is what makes{" "}
-            <code className="text-xs bg-zinc-100 px-1.5 py-0.5 rounded">npm rebuild</code>{" "}
-            work as a recovery step: it re-runs{" "}
-            <code className="text-xs bg-zinc-100 px-1.5 py-0.5 rounded">postinstall</code>{" "}
-            without redownloading the tarball.
+          <p className="text-zinc-600 mt-6 mb-4 leading-relaxed">
+            The server version string is hardcoded in the Swift source and returned in the MCP
+            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800"> initialize</code> response:
           </p>
+          <AnimatedCodeBlock
+            code={serverVersionCode}
+            language="swift"
+            filename="Sources/WhatsAppMCP/main.swift"
+          />
         </section>
 
-        <section className="max-w-5xl mx-auto px-6 mt-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">
-            Numbers that matter when you update
+        <section className="max-w-4xl mx-auto px-6 my-16">
+          <h2 className="text-3xl font-bold text-zinc-900 mb-4">
+            What &ldquo;the host holds it open&rdquo; looks like in the wild
           </h2>
-          <p className="text-zinc-600 text-lg leading-relaxed mb-6">
-            All four are pulled from the repo, not made up.
+          <p className="text-zinc-600 mb-8 leading-relaxed">
+            The case below is not specific to MCP. Anything with a long-lived parent that spawns
+            the npm-installed CLI as a child behaves identically. These hosts all hold CLI binaries
+            open for the life of their process:
           </p>
-          <MetricsRow
-            metrics={[
-              { value: 1214, label: "lines of Swift in main.swift" },
-              { value: 11, label: "MCP tools registered on startup" },
-              { value: 2, label: "SwiftPM deps pulled at build time" },
-              { value: 0, label: "pre-built binaries in the tarball" },
-            ]}
-          />
-
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
-              <div className="text-3xl font-bold text-zinc-900">
-                <NumberTicker value={1} decimals={1} suffix=".1.0" />
-              </div>
-              <p className="text-sm text-zinc-500 mt-1">
-                npm tag (what{" "}
-                <code className="text-xs bg-zinc-100 px-1 rounded">npm update</code>{" "}
-                moves)
-              </p>
+          <Marquee speed={40}>
+            <div className="flex items-center gap-3 pr-3">
+              {hostMarqueeItems.map((h) => (
+                <span
+                  key={h}
+                  className="inline-flex items-center whitespace-nowrap rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-800 shadow-sm"
+                >
+                  {h}
+                </span>
+              ))}
             </div>
-            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
-              <div className="text-3xl font-bold text-zinc-900">
-                <NumberTicker value={3} decimals={1} suffix=".0.0" />
-              </div>
-              <p className="text-sm text-zinc-500 mt-1">
-                Swift server version (MCP wire handshake)
-              </p>
-            </div>
-            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
-              <div className="text-3xl font-bold text-zinc-900">
-                <NumberTicker value={13} suffix="+" />
-              </div>
-              <p className="text-sm text-zinc-500 mt-1">
-                minimum macOS major version for Catalyst build
-              </p>
-            </div>
-            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
-              <div className="text-3xl font-bold text-zinc-900">
-                <NumberTicker value={1} />
-              </div>
-              <p className="text-sm text-zinc-500 mt-1">
-                platform the tarball installs on (darwin)
-              </p>
-            </div>
-          </div>
-          <p className="text-sm text-zinc-500 mt-6">
-            The npm tag and the server version are deliberately independent.
-            The first tracks the release artifact on the registry. The second
-            tracks the MCP protocol surface exposed by the binary, hardcoded
-            in{" "}
-            <code className="text-xs bg-zinc-100 px-1.5 py-0.5 rounded">
-              Sources/WhatsAppMCP/main.swift
-            </code>{" "}
-            on line 1115. Updating the first does not automatically move the
-            second.
+          </Marquee>
+          <p className="text-sm text-zinc-500 mt-4 text-center max-w-2xl mx-auto">
+            If any of these spawned your package, <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">npm update</code> is step 1 of 2.
+            The host still needs to be told to respawn.
           </p>
         </section>
 
-        <section className="max-w-5xl mx-auto px-6 mt-20">
-          <ComparisonTable
-            heading="JS-only update vs. native-postinstall update"
-            intro="Where the generic advice applies, and where it quietly fails."
-            productName="Package with native postinstall"
-            competitorName="Pure-JS package"
-            rows={comparisonRows}
-            caveat="Same npm, same commands, two very different workflows."
-          />
-        </section>
-
-        <section className="max-w-4xl mx-auto px-6 mt-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">
-            After you update: verify the build, not just the version
+        <section className="max-w-4xl mx-auto px-6 my-16">
+          <h2 className="text-3xl font-bold text-zinc-900 mb-4">
+            The &ldquo;npm update succeeded&rdquo; illusion
           </h2>
-          <p className="text-zinc-600 text-lg leading-relaxed mb-4">
-            For a pure-JS package,{" "}
-            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded">
-              npm list -g pkg
-            </code>{" "}
-            is enough. For anything that compiles native code, you need to
-            confirm the compile actually produced a working binary.
-          </p>
-          <AnimatedChecklist
-            title="three checks after every update"
-            items={[
-              {
-                text: "npm list -g whatsapp-mcp-macos returns the version you expected",
-                checked: true,
-              },
-              {
-                text: "stat -f '%Sm' $(which whatsapp-mcp) shows a fresh mtime",
-                checked: true,
-              },
-              {
-                text: "the first MCP tool call (whatsapp_status) returns without a spawn error",
-                checked: true,
-              },
-              {
-                text: "on macOS, Privacy & Security > Accessibility still shows the host app trusted",
-                checked: true,
-              },
-              {
-                text: "the host app's stderr log reads 'defined 11 tools' (matches the current tool count)",
-                checked: true,
-              },
-            ]}
-          />
-        </section>
-
-        <section className="max-w-4xl mx-auto px-6 mt-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">
-            The rollback path
-          </h2>
-          <p className="text-zinc-600 text-lg leading-relaxed mb-6">
-            Native rebuilds can regress. The rollback for an npm package
-            with a postinstall is still npm, but you have to name the version
-            explicitly, because{" "}
-            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded">
-              npm update
-            </code>{" "}
-            never moves backwards.
+          <p className="text-zinc-600 mb-6 leading-relaxed">
+            Here is the exact terminal trace of an update that appears to succeed. Read the last
+            three lines carefully:
           </p>
           <TerminalOutput
-            title="rolling back to a known-good version"
-            lines={[
-              {
-                text: "npm view whatsapp-mcp-macos versions --json",
-                type: "command",
-              },
-              { text: "[ \"1.0.0\", \"1.0.3\", \"1.1.0\" ]", type: "output" },
-              {
-                text: "npm install -g whatsapp-mcp-macos@1.0.3",
-                type: "command",
-              },
-              {
-                text: "running postinstall: xcrun swift build -c release",
-                type: "info",
-              },
-              {
-                text: "build complete in 19.2s",
-                type: "success",
-              },
-              { text: "which whatsapp-mcp && whatsapp-mcp --help", type: "command" },
-              {
-                text: "/Users/you/.nvm/.../bin/whatsapp-mcp",
-                type: "output",
-              },
-              {
-                text: "rolled back; 11 tools registered on the 1.0.3 binary",
-                type: "success",
-              },
+            title="npm update -g whatsapp-mcp-macos (host still running)"
+            lines={terminalAfterUpdate}
+          />
+          <p className="text-zinc-600 mt-4 leading-relaxed">
+            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">npm update</code> finished
+            cleanly. <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">npm list</code> confirms
+            the new tag is on disk. The MCP host is perfectly happy. And the tool call still returns the old
+            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800"> serverInfo.version</code> because
+            the PID that is answering was born before the update.
+          </p>
+        </section>
+
+        <GlowCard className="max-w-4xl mx-auto px-6 my-16">
+          <div className="p-8">
+            <p className="text-xs font-mono uppercase tracking-widest text-teal-600 mb-3">
+              anchor fact
+            </p>
+            <h3 className="text-2xl font-bold text-zinc-900 mb-3">
+              <NumberTicker value={2} /> version strings, not one
+            </h3>
+            <p className="text-zinc-600 leading-relaxed">
+              <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">package.json</code> currently
+              publishes <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">&quot;version&quot;: &quot;1.1.0&quot;</code>.
+              The MCP server hardcodes <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">version: &quot;3.0.0&quot;</code> in
+              <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800"> Sources/WhatsAppMCP/main.swift</code>.
+              The first updates every <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">npm publish</code>. The
+              second only updates when a release edits main.swift. If you try to infer one from the other, you will
+              misdiagnose whether your install drifted.
+            </p>
+          </div>
+        </GlowCard>
+
+        <section className="max-w-4xl mx-auto px-6 my-16">
+          <h2 className="text-3xl font-bold text-zinc-900 mb-4">
+            How the host actually picks up the new binary
+          </h2>
+          <p className="text-zinc-600 mb-8 leading-relaxed">
+            The MCP handshake is where the new version enters the host&rsquo;s world. The host sends an
+            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800"> initialize</code> request,
+            the freshly-spawned server responds with its <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">serverInfo</code>,
+            and only then does the host know what version it is talking to.
+          </p>
+          <SequenceDiagram
+            title="mcp initialize handshake after a respawn"
+            actors={["MCP Host", "whatsapp-mcp (child)", "macOS kernel"]}
+            messages={[
+              { from: 0, to: 2, label: "fork() + execve()", type: "request" },
+              { from: 2, to: 1, label: "loads new binary into memory", type: "event" },
+              { from: 1, to: 0, label: "stdio pipes open", type: "response" },
+              { from: 0, to: 1, label: '{ "method": "initialize" }', type: "request" },
+              { from: 1, to: 0, label: '{ "serverInfo": { "version": "3.0.x" } }', type: "response" },
+              { from: 0, to: 1, label: 'tools/list', type: "request" },
+              { from: 1, to: 0, label: '11 tools (defined 11 tools)', type: "response" },
             ]}
           />
+          <p className="text-sm text-zinc-500 mt-4">
+            Note the direction: the version travels from the freshly spawned child back up to the host.
+            It never travels sideways from <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">package.json</code>.
+          </p>
         </section>
 
-        <section className="mt-16">
-          <InlineCta
-            heading="Try the package that made me write this page"
-            body="whatsapp-mcp-macos is an MCP server that drives the native macOS WhatsApp app through accessibility APIs. One npm install, one Swift rebuild, 11 tools for Claude."
-            linkText="See the install docs"
-            href="/"
+        <section className="max-w-4xl mx-auto px-6 my-16" id="the-upgrade-recipe">
+          <h2 className="text-3xl font-bold text-zinc-900 mb-4">
+            The upgrade recipe, end to end
+          </h2>
+          <p className="text-zinc-600 mb-8 leading-relaxed">
+            This sequence is deliberately five steps. Every tutorial you will find on the first page
+            of search results stops at step 3. Steps 4 and 5 are where the new code actually reaches
+            the process doing the work.
+          </p>
+          <StepTimeline steps={updateRecipeSteps} />
+        </section>
+
+        <section className="max-w-4xl mx-auto px-6 my-16">
+          <h2 className="text-3xl font-bold text-zinc-900 mb-6">
+            The same trace after the host restart
+          </h2>
+          <p className="text-zinc-600 mb-6 leading-relaxed">
+            Here is what the trace looks like after you quit and relaunch the host. Notice the new
+            PID and the version string that now matches the freshly published binary:
+          </p>
+          <TerminalOutput
+            title="whatsapp_status after the host respawn"
+            lines={terminalAfterRestart}
           />
         </section>
 
-        <FaqSection
-          items={faqItems}
-          heading="FAQ: updating an npm package that ships native code"
+        <section className="max-w-5xl mx-auto px-6 my-16">
+          <h2 className="text-3xl font-bold text-zinc-900 mb-4 text-center">
+            Library package vs. host-held CLI
+          </h2>
+          <p className="text-zinc-600 mb-8 leading-relaxed text-center max-w-2xl mx-auto">
+            Treating <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">whatsapp-mcp-macos</code> like
+            a typical <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800">chalk</code> or
+            <code className="text-sm bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800"> commander</code> update is where
+            most people get stuck. The differences are visible the moment you line them up side by side:
+          </p>
+          <ComparisonTable
+            productName="whatsapp-mcp-macos (CLI held open by a host)"
+            competitorName="A typical npm library (e.g. chalk)"
+            rows={comparisonRows}
+          />
+        </section>
+
+        <InlineCta
+          heading="Installing whatsapp-mcp-macos for the first time?"
+          body="There is a separate flow for fresh installs (Accessibility permission, MCP client config, postinstall prerequisites). Start at the setup guide."
+          linkText="Read the setup guide"
+          href="/"
         />
+
+        <FaqSection items={faqItems} />
       </article>
     </>
   );
