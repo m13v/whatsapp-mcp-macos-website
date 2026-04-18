@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   alternates: { canonical: PAGE_URL },
   openGraph: {
     title:
-      "npm how to update package — when a host process is keeping it open",
+      "npm how to update package, when a host process is keeping it open",
     description:
       "If the package you are updating is a CLI that a long-running parent has spawned as a child (MCP server, language server, daemon), npm update does not reach the running process. Here is the field guide.",
     url: PAGE_URL,
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "npm how to update package — the held-open-by-a-host edition",
+    title: "npm how to update package, the held-open-by-a-host edition",
     description:
       "npm update replaces the file on disk. The running child process keeps the old binary in memory. npm list cannot tell the difference. Here is what to do instead.",
   },
@@ -233,7 +233,7 @@ const faqItems = [
   },
   {
     q: "Will `npm update` kill my running host to force a respawn?",
-    a: "No, and it should not. npm has no concept of which processes currently hold open executables from its store. On POSIX systems, replacing a binary does not affect processes that already loaded it; the kernel keeps the old inode alive until the last fd closes. That is also why `rm $(which whatsapp-mcp)` during a live session would not crash Claude Code — the running server keeps executing from the unlinked inode.",
+    a: "No, and it should not. npm has no concept of which processes currently hold open executables from its store. On POSIX systems, replacing a binary does not affect processes that already loaded it; the kernel keeps the old inode alive until the last fd closes. That is also why `rm $(which whatsapp-mcp)` during a live session would not crash Claude Code; the running server keeps executing from the unlinked inode.",
   },
   {
     q: "Can I just send the MCP host a SIGHUP to reload the server?",
