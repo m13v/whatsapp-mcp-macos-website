@@ -68,7 +68,7 @@ const breadcrumbSchemaItems = [
 const sendMessageSourceCode = `// Sources/WhatsAppMCP/main.swift, lines 1082-1092
 let sendMessageTool = Tool(
     name: "whatsapp_send_message",
-    description: "Send a message in the CURRENTLY OPEN chat. Does NOT search or navigate — it only types and sends. Use whatsapp_search + whatsapp_open_chat + whatsapp_get_active_chat to verify the right chat first.",
+    description: "Send a message in the CURRENTLY OPEN chat. Does NOT search or navigate, it only types and sends. Use whatsapp_search + whatsapp_open_chat + whatsapp_get_active_chat to verify the right chat first.",
     inputSchema: .object([
         "type": .string("object"),
         "properties": .object([
@@ -81,7 +81,7 @@ let sendMessageTool = Tool(
 const openChatSourceCode = `// Sources/WhatsAppMCP/main.swift, lines 1048-1057
 let openChatTool = Tool(
     name: "whatsapp_open_chat",
-    description: "Click the Nth search result to open that chat. Call whatsapp_search first, then use the index from the results. Returns the name of the chat that was actually opened — verify this matches your intended contact.",
+    description: "Click the Nth search result to open that chat. Call whatsapp_search first, then use the index from the results. Returns the name of the chat that was actually opened, verify this matches your intended contact.",
     inputSchema: .object([
         "type": .string("object"),
         "properties": .object([
@@ -95,7 +95,7 @@ let searchTool = Tool(
     name: "whatsapp_search",
     description: """
     Search WhatsApp contacts/chats. Returns structured results with: index, section (chats/contacts), contactName, rawDescription, preview, time.
-    Leaves search OPEN — call whatsapp_open_chat(index) to select a result.
+    Leaves search OPEN, call whatsapp_open_chat(index) to select a result.
     If the contact you want isn't visible, use whatsapp_scroll_search to load more results.
     """,
     inputSchema: .object([
@@ -109,7 +109,7 @@ let searchTool = Tool(
 
 const genericDescription = `description: "Send a WhatsApp message to a contact."`;
 
-const protocolDescription = `description: "Send a message in the CURRENTLY OPEN chat. Does NOT search or navigate — it only types and sends. Use whatsapp_search + whatsapp_open_chat + whatsapp_get_active_chat to verify the right chat first."`;
+const protocolDescription = `description: "Send a message in the CURRENTLY OPEN chat. Does NOT search or navigate, it only types and sends. Use whatsapp_search + whatsapp_open_chat + whatsapp_get_active_chat to verify the right chat first."`;
 
 const terminalLines = [
   { type: "command" as const, text: "# what an agent reads when it picks up the WhatsApp MCP" },
@@ -117,7 +117,7 @@ const terminalLines = [
   { type: "output" as const, text: "  whatsapp_status        \"Check if WhatsApp is running and accessibility is granted.\"" },
   { type: "output" as const, text: "  whatsapp_start         \"Launch WhatsApp if not already running. Returns PID.\"" },
   { type: "output" as const, text: "  whatsapp_get_active_chat \"...Use this to verify which chat is open before sending a message.\"" },
-  { type: "output" as const, text: "  whatsapp_search        \"...Leaves search OPEN — call whatsapp_open_chat(index) to select a result.\"" },
+  { type: "output" as const, text: "  whatsapp_search        \"...Leaves search OPEN, call whatsapp_open_chat(index) to select a result.\"" },
   { type: "output" as const, text: "  whatsapp_open_chat     \"...Call whatsapp_search first... verify this matches your intended contact.\"" },
   { type: "output" as const, text: "  whatsapp_send_message  \"Send a message in the CURRENTLY OPEN chat. Does NOT search or navigate...\"" },
   { type: "info" as const, text: "every description names a sibling tool by exact name" },
@@ -138,7 +138,7 @@ const protocolSteps = [
   {
     title: "1. whatsapp_search(query)",
     description:
-      "Description ends with 'Leaves search OPEN — call whatsapp_open_chat(index) to select a result.' The search box stays open on purpose so the next tool can click into the result list. The description tells the model both the side effect (search remains open) and the next tool (whatsapp_open_chat).",
+      "Description ends with 'Leaves search OPEN, call whatsapp_open_chat(index) to select a result.' The search box stays open on purpose so the next tool can click into the result list. The description tells the model both the side effect (search remains open) and the next tool (whatsapp_open_chat).",
   },
   {
     title: "2. whatsapp_open_chat(index)",
@@ -153,7 +153,7 @@ const protocolSteps = [
   {
     title: "4. whatsapp_send_message(message)",
     description:
-      "Description: 'Send a message in the CURRENTLY OPEN chat. Does NOT search or navigate — it only types and sends. Use whatsapp_search + whatsapp_open_chat + whatsapp_get_active_chat to verify the right chat first.' One description names the entire prefix protocol the model must run before invoking it.",
+      "Description: 'Send a message in the CURRENTLY OPEN chat. Does NOT search or navigate, it only types and sends. Use whatsapp_search + whatsapp_open_chat + whatsapp_get_active_chat to verify the right chat first.' One description names the entire prefix protocol the model must run before invoking it.",
   },
 ];
 
