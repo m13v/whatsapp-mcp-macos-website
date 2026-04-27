@@ -2,7 +2,12 @@ node_modules/
 .next/
 out/
 .env*
+# NEXT_PUBLIC_POSTHOG_KEY is a phc_ ingestion key: public by design, baked into
+# the client bundle anyway. Committing .env.production lets `next build` (in
+# CI / Vercel) read it without --build-arg plumbing.
+!.env.production
 *.log
 .DS_Store
 tsconfig.tsbuildinfo
 next-env.d.ts
+.vercel
