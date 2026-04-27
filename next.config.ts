@@ -8,4 +8,4 @@ const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: true },
 };
 
-export default withSeoContent(nextConfig, { contentDir: "src/app/(content)/t" });
+export default withSeoContent(nextConfig, { contentDir: "src/app/(main)/t" });
