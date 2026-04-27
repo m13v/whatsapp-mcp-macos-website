@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy — WhatsApp MCP for macOS",
+  title: "Privacy",
   description:
     "What WhatsApp MCP for macOS does and does not do with your data. Local-only execution, no telemetry by default, optional analytics on this marketing site.",
   alternates: { canonical: "/privacy" },
