@@ -8,5 +8,5 @@ export const POST = createGuideChatHandler({
   brand: "WhatsApp MCP for macOS",
   siteDescription:
     "MCP server that drives the native WhatsApp desktop app on macOS through accessibility APIs.",
-  contentDir: "src/app/(content)/t",
+  contentDir: "src/app/(main)/t",
 });
