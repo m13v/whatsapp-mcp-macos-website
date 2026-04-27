@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { GetStartedLink } from "@/components/GetStartedLink";
 import { BookCallLink } from "@/components/BookCallLink";
-import { GITHUB_URL, NPM_INSTALL_CMD, NPM_PACKAGE } from "@/lib/get-started";
+import { GetStartedEmailGate } from "@/components/GetStartedEmailGate";
+import { GITHUB_URL, NPM_PACKAGE } from "@/lib/get-started";
 
 export const metadata: Metadata = {
   title: "Install — WhatsApp MCP for macOS",
@@ -9,15 +9,6 @@ export const metadata: Metadata = {
     "Install the WhatsApp MCP server on macOS. Single npm command, Swift postinstall, then register the server in Claude Desktop, Claude Code, Cursor, or any MCP client.",
   alternates: { canonical: "/install" },
 };
-
-const claudeJson = `{
-  "mcpServers": {
-    "whatsapp": {
-      "command": "${NPM_PACKAGE}",
-      "transport": "stdio"
-    }
-  }
-}`;
 
 export default function InstallPage() {
   return (
@@ -31,16 +22,24 @@ export default function InstallPage() {
         Command Line Tools for the Swift compile.
       </p>
 
+      <div className="mt-10 rounded-lg border border-zinc-200 bg-zinc-50 p-6">
+        <h2 className="text-base font-semibold text-zinc-900">Drop your email to reveal the install command</h2>
+        <p className="mt-2 text-sm text-zinc-600">
+          One short note when something useful ships. No spam.
+        </p>
+        <div className="mt-4">
+          <GetStartedEmailGate label="Get the install command" section="install-page" variant="primary" />
+        </div>
+      </div>
+
       <ol className="mt-12 space-y-12">
         <li>
           <p className="font-mono text-xs text-teal-600">01</p>
           <h2 className="mt-2 text-lg font-semibold text-zinc-900">Install the npm package</h2>
-          <pre className="mt-3 overflow-x-auto rounded-md border border-zinc-200 bg-zinc-50 p-4 font-mono text-sm text-zinc-800">
-            <code>{NPM_INSTALL_CMD}</code>
-          </pre>
           <p className="mt-3 text-sm text-zinc-600">
             The postinstall script runs <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs">xcrun swift build -c release</code>{" "}
-            to compile the Swift binary. First install takes ~30 seconds.
+            to compile the Swift binary. First install takes ~30 seconds. The exact command appears
+            in the modal above once you submit your email.
           </p>
         </li>
 
@@ -64,14 +63,14 @@ export default function InstallPage() {
           <p className="font-mono text-xs text-teal-600">03</p>
           <h2 className="mt-2 text-lg font-semibold text-zinc-900">Register the MCP server</h2>
           <p className="mt-3 text-sm leading-relaxed text-zinc-600">
-            Add an entry to <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs">~/.claude.json</code>{" "}
-            (Claude Code) or the equivalent file for your MCP client:
+            Drop the JSON config from the install modal into{" "}
+            <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs">~/.claude.json</code>{" "}
+            (Claude Code) or the equivalent file for your MCP client. Restart the client. The
+            WhatsApp MCP server should appear in the available tool list.
           </p>
-          <pre className="mt-3 overflow-x-auto rounded-md border border-zinc-200 bg-zinc-50 p-4 font-mono text-sm text-zinc-800">
-            <code>{claudeJson}</code>
-          </pre>
-          <p className="mt-3 text-sm leading-relaxed text-zinc-600">
-            Restart the client. The WhatsApp MCP server should appear in the available tool list.
+          <p className="mt-3 text-sm leading-relaxed text-zinc-500">
+            Suppressed for the unauthenticated view; the modal above contains the exact JSON for{" "}
+            <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs">{NPM_PACKAGE}</code>.
           </p>
         </li>
 
