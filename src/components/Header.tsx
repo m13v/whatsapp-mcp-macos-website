@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { BookCallLink } from "@/components/BookCallLink";
-import { GetStartedLink } from "@/components/GetStartedLink";
+import { GetStartedEmailGate } from "@/components/GetStartedEmailGate";
 import { GITHUB_URL } from "@/lib/get-started";
 
 const navLinks = [
@@ -47,13 +47,7 @@ export function Header() {
           >
             Book a call
           </BookCallLink>
-          <GetStartedLink
-            href="/install"
-            section="header"
-            className="rounded-md bg-zinc-900 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-          >
-            Install
-          </GetStartedLink>
+          <GetStartedEmailGate label="Install" section="header" variant="primary" className="h-9 px-3.5" />
         </nav>
 
         <button
@@ -101,14 +95,9 @@ export function Header() {
             >
               Book a call
             </BookCallLink>
-            <GetStartedLink
-              href="/install"
-              section="header-mobile"
-              onClick={() => setMobileOpen(false)}
-              className="mt-2 rounded-md bg-zinc-900 px-3.5 py-2 text-center text-sm font-medium text-white"
-            >
-              Install
-            </GetStartedLink>
+            <div className="mt-2">
+              <GetStartedEmailGate label="Install" section="header-mobile" variant="primary" />
+            </div>
           </div>
         </nav>
       ) : null}
