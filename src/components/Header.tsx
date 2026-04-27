@@ -7,7 +7,6 @@ import { GetStartedEmailGate } from "@/components/GetStartedEmailGate";
 import { GITHUB_URL } from "@/lib/get-started";
 
 const navLinks = [
-  { href: "/install", label: "Install" },
   { href: "/faq", label: "FAQ" },
   { href: "/t", label: "Guides" },
 ];
