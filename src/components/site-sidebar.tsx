@@ -2,6 +2,6 @@ import { walkPages } from "@seo/components/server";
 import { SitemapSidebarWrapper } from "./site-sidebar-client";
 
 export function SiteSidebar() {
-  const pages = walkPages({ excludePaths: ["api"] });
+  const pages = walkPages({ excludePaths: ["api", "sitemap"] });
   return <SitemapSidebarWrapper pages={pages} />;
 }
