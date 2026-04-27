@@ -494,7 +494,7 @@ export default function InstallNpmPackageGloballyPage() {
           <ArticleMeta
             datePublished={PUBLISHED}
             readingTime="11 min read"
-            authorRole="maintainer of whatsapp-mcp-macos"
+            authorRole="Written with AI"
           />
         </div>
         <ProofBand

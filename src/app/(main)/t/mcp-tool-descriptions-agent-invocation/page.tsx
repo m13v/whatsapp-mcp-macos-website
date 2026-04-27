@@ -276,7 +276,7 @@ export default function McpToolDescriptionsAgentInvocationPage() {
           <ArticleMeta
             datePublished={PUBLISHED}
             readingTime="9 min read"
-            authorRole="maintainer of whatsapp-mcp-macos"
+            authorRole="Written with AI"
           />
         </div>
 

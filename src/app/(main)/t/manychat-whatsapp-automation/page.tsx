@@ -379,7 +379,7 @@ export default function ManychatWhatsappAutomationPage() {
           <ArticleMeta
             datePublished={PUBLISHED}
             readingTime="12 min read"
-            authorRole="maintainer of whatsapp-mcp-macos"
+            authorRole="Written with AI"
           />
         </div>
         <ProofBand

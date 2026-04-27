@@ -407,7 +407,7 @@ export default function NpmDeletePackagePage() {
           <ArticleMeta
             datePublished={PUBLISHED}
             readingTime="10 min read"
-            authorRole="maintainer of whatsapp-mcp-macos"
+            authorRole="Written with AI"
           />
         </div>
         <ProofBand
