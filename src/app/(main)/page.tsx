@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BookCallLink } from "@/components/BookCallLink";
-import { GetStartedLink } from "@/components/GetStartedLink";
-import { GITHUB_URL, NPM_INSTALL_CMD } from "@/lib/get-started";
+import { GetStartedEmailGate } from "@/components/GetStartedEmailGate";
+import { GITHUB_URL } from "@/lib/get-started";
 
 export const metadata: Metadata = {
-  title: "WhatsApp MCP for macOS — drive WhatsApp from Claude, Cursor, or any MCP client",
+  title: { absolute: "WhatsApp MCP for macOS — drive WhatsApp from Claude, Cursor, or any MCP client" },
   description:
     "Open-source MCP server that lets AI assistants search contacts, send messages, and read chats in the native WhatsApp desktop app on macOS. No Meta Business API. No browser automation.",
   alternates: { canonical: "/" },
@@ -125,17 +125,7 @@ export default function HomePage() {
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <code className="inline-flex items-center rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 font-mono text-sm text-zinc-800">
-              <span className="select-none text-zinc-400">$</span>
-              <span className="ml-2">{NPM_INSTALL_CMD}</span>
-            </code>
-            <GetStartedLink
-              href="/install"
-              section="hero"
-              className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-            >
-              Install instructions
-            </GetStartedLink>
+            <GetStartedEmailGate label="Get the install command" section="hero" variant="primary" />
             <BookCallLink
               section="hero"
               className="inline-flex items-center justify-center rounded-md border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-800 transition-colors hover:border-zinc-400"
@@ -183,13 +173,7 @@ export default function HomePage() {
             ))}
           </div>
           <div className="mt-10 flex flex-wrap gap-3">
-            <GetStartedLink
-              href="/install"
-              section="how-it-works"
-              className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-            >
-              Install
-            </GetStartedLink>
+            <GetStartedEmailGate label="Get the install command" section="how-it-works" variant="primary" />
             <a
               href={GITHUB_URL}
               target="_blank"
@@ -237,13 +221,7 @@ export default function HomePage() {
             One install. One config block. Your assistant talks to WhatsApp like you do.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <GetStartedLink
-              href="/install"
-              section="final-cta"
-              className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-            >
-              Install for Mac
-            </GetStartedLink>
+            <GetStartedEmailGate label="Get the install command" section="final-cta" variant="primary" />
             <BookCallLink
               section="final-cta"
               className="inline-flex items-center justify-center rounded-md border border-zinc-300 px-6 py-3 text-sm font-medium text-zinc-800 transition-colors hover:border-zinc-400"
