@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "FAQ — WhatsApp MCP for macOS",
+  title: "FAQ",
   description:
     "Common questions about the WhatsApp MCP server on macOS: how it works, ban risk, supported clients, and the differences vs the WhatsApp Business API or WhatsApp Web automation.",
   alternates: { canonical: "/faq" },
