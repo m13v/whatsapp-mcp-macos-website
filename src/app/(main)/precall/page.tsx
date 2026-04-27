@@ -4,7 +4,7 @@ import { GetStartedLink } from "@/components/GetStartedLink";
 import { GITHUB_URL } from "@/lib/get-started";
 
 export const metadata: Metadata = {
-  title: "Book a call — WhatsApp MCP for macOS",
+  title: "Book a call",
   description:
     "15 minutes with the maintainer of WhatsApp MCP for macOS. Talk through your automation idea, agent setup, or integration question.",
   alternates: { canonical: "/precall" },
