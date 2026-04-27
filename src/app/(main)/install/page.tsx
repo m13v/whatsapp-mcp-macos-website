@@ -4,7 +4,7 @@ import { GetStartedEmailGate } from "@/components/GetStartedEmailGate";
 import { GITHUB_URL, NPM_PACKAGE } from "@/lib/get-started";
 
 export const metadata: Metadata = {
-  title: "Install — WhatsApp MCP for macOS",
+  title: "Install",
   description:
     "Install the WhatsApp MCP server on macOS. Single npm command, Swift postinstall, then register the server in Claude Desktop, Claude Code, Cursor, or any MCP client.",
   alternates: { canonical: "/install" },
