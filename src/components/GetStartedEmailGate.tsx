@@ -1,18 +1,9 @@
 "use client";
 
 import { InstallEmailGate } from "@seo/components";
-import { GITHUB_URL, NPM_INSTALL_CMD, NPM_PACKAGE } from "@/lib/get-started";
+import { GITHUB_URL, NPM_INSTALL_CMD } from "@/lib/get-started";
 
 const STORAGE_KEY = "whatsapp_mcp_install_email_captured";
-
-const CLAUDE_CONFIG = `{
-  "mcpServers": {
-    "whatsapp": {
-      "command": "${NPM_PACKAGE}",
-      "transport": "stdio"
-    }
-  }
-}`;
 
 export function GetStartedEmailGate({
   label = "Get the install command",
@@ -27,8 +18,10 @@ export function GetStartedEmailGate({
 }) {
   return (
     <InstallEmailGate
+      // command is required by the prop type but is never shown in emailOnly
+      // mode. The actual install snippets are delivered via the welcome email
+      // built in src/app/api/newsletter/route.ts.
       command={NPM_INSTALL_CMD}
-      configBlock={{ label: "Add to your MCP client config", code: CLAUDE_CONFIG }}
       site="whatsapp-mcp-macos"
       section={section}
       label={label}
@@ -37,16 +30,18 @@ export function GetStartedEmailGate({
       storageKey={STORAGE_KEY}
       githubUrl={GITHUB_URL}
       modalTitle="Get the install command"
-      modalDescription="Drop your email and we'll show you the one-line install plus the occasional update. No spam."
-      commandTitle="Run this on your Mac"
-      commandDescription="macOS 13+, with the WhatsApp desktop app installed. Postinstall compiles the Swift binary."
-      commandFooter={
+      modalDescription="Drop your email and we'll send the one-line install plus configs for every MCP client. No spam."
+      submitLabel="Email me the install"
+      emailOnly
+      sentTitle="Install command sent"
+      sentDescription={(email) => (
         <>
-          Drop the JSON into <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono text-[11px]">~/.claude.json</code>{" "}
-          (Claude Code) or your client&apos;s equivalent, then restart the client. Grant
-          Accessibility permission to the host app on first run.
+          Sent to <span className="font-medium text-zinc-900">{email}</span>.
+          Open your inbox to grab the install for Claude Code, Claude Desktop,
+          Cursor, VS Code, and Windsurf. If you don&apos;t see it in a minute,
+          check spam or promotions.
         </>
-      }
+      )}
     />
   );
 }
