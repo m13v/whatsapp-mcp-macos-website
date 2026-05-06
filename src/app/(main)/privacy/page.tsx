@@ -43,7 +43,7 @@ export default function PrivacyPage() {
 
         <h2 className="mt-8 text-lg font-semibold text-zinc-900">Contact</h2>
         <p className="mt-3 text-sm leading-relaxed text-zinc-600">
-          Privacy questions: <a href="mailto:hello@whatsapp-mcp-macos.com" className="text-teal-700 hover:text-teal-800">hello@whatsapp-mcp-macos.com</a>.
+          Privacy questions: <a href="mailto:matt@whatsapp-mcp-macos.com" className="text-teal-700 hover:text-teal-800">matt@whatsapp-mcp-macos.com</a>.
           Data deletion requests, same address.
         </p>
       </div>
