@@ -23,12 +23,12 @@ export default function InstallPage() {
       </p>
 
       <div className="mt-10 rounded-lg border border-zinc-200 bg-zinc-50 p-6">
-        <h2 className="text-base font-semibold text-zinc-900">Drop your email to reveal the install command</h2>
+        <h2 className="text-base font-semibold text-zinc-900">Drop your email and we&rsquo;ll send the install command</h2>
         <p className="mt-2 text-sm text-zinc-600">
-          One short note when something useful ships. No spam.
+          The one-line install plus the JSON config for Claude Code, Claude Desktop, Cursor, VS Code, and Windsurf land in your inbox in under a minute. No spam.
         </p>
         <div className="mt-4">
-          <GetStartedEmailGate label="Get the install command" section="install-page" variant="primary" />
+          <GetStartedEmailGate label="Email me the install" section="install-page" variant="primary" />
         </div>
       </div>
 
@@ -38,8 +38,9 @@ export default function InstallPage() {
           <h2 className="mt-2 text-lg font-semibold text-zinc-900">Install the npm package</h2>
           <p className="mt-3 text-sm text-zinc-600">
             The postinstall script runs <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs">xcrun swift build -c release</code>{" "}
-            to compile the Swift binary. First install takes ~30 seconds. The exact command appears
-            in the modal above once you submit your email.
+            to compile the Swift binary. First install takes ~30 seconds. The exact{" "}
+            <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs">npm install</code>{" "}
+            line lands in your inbox once you submit your email above.
           </p>
         </li>
 
