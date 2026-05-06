@@ -38,17 +38,17 @@ const steps = [
   {
     n: "01",
     title: "Install the npm package",
-    body: "npm install -g whatsapp-mcp-macos. The postinstall script compiles the Swift binary in release mode.",
+    body: "One global npm install. The postinstall script compiles the Swift binary in release mode. We email the exact command after you sign up.",
   },
   {
     n: "02",
     title: "Grant Accessibility permission",
-    body: "System Settings → Privacy & Security → Accessibility, enable the host app (Claude Desktop, Terminal, Fazm, etc.).",
+    body: "System Settings, Privacy & Security, Accessibility, enable the host app (Claude Desktop, Terminal, Fazm, etc.).",
   },
   {
     n: "03",
     title: "Register the MCP server",
-    body: "Add a single mcpServers entry to ~/.claude.json or your client's config. Restart the client.",
+    body: "Drop a single JSON block into your MCP client's config and restart it. The exact snippet for Claude Code, Claude Desktop, Cursor, VS Code, and Windsurf lands in your inbox.",
   },
   {
     n: "04",
