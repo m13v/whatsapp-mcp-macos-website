@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { BookCallLink } from "@/components/BookCallLink";
 import { GetStartedEmailGate } from "@/components/GetStartedEmailGate";
-import { GITHUB_URL, NPM_PACKAGE } from "@/lib/get-started";
+import { GITHUB_URL } from "@/lib/get-started";
 
 export const metadata: Metadata = {
   title: "Install",
@@ -64,14 +64,15 @@ export default function InstallPage() {
           <p className="font-mono text-xs text-teal-600">03</p>
           <h2 className="mt-2 text-lg font-semibold text-zinc-900">Register the MCP server</h2>
           <p className="mt-3 text-sm leading-relaxed text-zinc-600">
-            Drop the JSON config from the install modal into{" "}
+            Drop the JSON config from the welcome email into{" "}
             <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs">~/.claude.json</code>{" "}
             (Claude Code) or the equivalent file for your MCP client. Restart the client. The
             WhatsApp MCP server should appear in the available tool list.
           </p>
           <p className="mt-3 text-sm leading-relaxed text-zinc-500">
-            Suppressed for the unauthenticated view; the modal above contains the exact JSON for{" "}
-            <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs">{NPM_PACKAGE}</code>.
+            We send the exact JSON for Claude Code, Claude Desktop, Cursor, VS Code, and Windsurf
+            once you submit your email above. Configs differ only by file path; the server entry
+            is identical.
           </p>
         </li>
 
