@@ -414,6 +414,8 @@ export default function Page() {
               datePublished: PUBLISHED,
               author: "Matthew Diakonov",
               authorUrl: "https://m13v.com",
+              publisherName: "WhatsApp MCP for macOS",
+              publisherUrl: "https://whatsapp-mcp-macos.com",
               url: PAGE_URL,
             })
           ),
