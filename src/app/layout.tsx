@@ -3,6 +3,7 @@ import { HeadingAnchors, FullSiteAnalytics, FounderChatPanel } from "@seo/compon
 import { SiteSidebar } from "@/components/site-sidebar";
 import { GuideChat } from "@/components/guide-chat";
 import "./globals.css";
+import { SeoEngagement } from "./seo-engagement";
 
 export const metadata: Metadata = {
   title: {
@@ -98,7 +99,8 @@ export default function RootLayout({
           <HeadingAnchors />
           <div className="flex min-h-screen">
             <SiteSidebar />
-            <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+            <div className="flex min-w-0 flex-1 flex-col">{children}
+            <SeoEngagement /></div>
             <GuideChat />
           </div>
           <FounderChatPanel project="WhatsApp MCP" />
