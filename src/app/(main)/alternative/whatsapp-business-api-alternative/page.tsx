@@ -10,6 +10,7 @@ import {
   AnimatedChecklist,
   GlowCard,
   HorizontalStepper,
+  RelatedPostsGrid,
   articleSchema,
   breadcrumbListSchema,
   faqPageSchema,
@@ -323,6 +324,33 @@ const faqItems = [
   },
 ];
 
+const relatedPosts = [
+  {
+    title: "WhatsApp desktop automation vs Cloud API: pick by throughput",
+    href: "/alternative/whatsapp-desktop-vs-cloud-api",
+    tag: "Comparison",
+    excerpt:
+      "If row two, three, or four pointed you at the local driver, this is the throughput math. Desktop automation has a hard ceiling near 15 messages per minute on one Mac. The Cloud API has none. Here is where the line sits.",
+    readTime: "8 min read",
+  },
+  {
+    title: "MCP server vs API, walked through one real workflow",
+    href: "/alternative/mcp-server-vs-api",
+    tag: "Comparison",
+    excerpt:
+      "Same operation (send one WhatsApp message), both paths, side by side: the Business Cloud API with its gates and webhook, versus the MCP server reading the chat bubble back as the receipt.",
+    readTime: "7 min read",
+  },
+  {
+    title: "WhatsApp MCP on Mac without the Business API",
+    href: "/t/whatsapp-mac-mcp-without-business-api",
+    tag: "Deep dive",
+    excerpt:
+      "Most WhatsApp MCPs that skip the Business API still route through some API substitute. This one binds to the running WhatsApp process and walks the macOS accessibility tree instead.",
+    readTime: "9 min read",
+  },
+];
+
 const jsonLd = [
   articleSchema({
     headline:
@@ -627,6 +655,14 @@ export default function WhatsappBusinessApiAlternativePage() {
 
         <section className="max-w-3xl mx-auto px-6 mt-16">
           <FaqSection items={faqItems} />
+        </section>
+
+        <section className="max-w-3xl mx-auto px-6 mt-16">
+          <RelatedPostsGrid
+            subtitle="Related on this site"
+            title="If you have already picked your path, read next"
+            posts={relatedPosts}
+          />
         </section>
 
         <BookCallCTA
