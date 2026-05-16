@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         destination: "/t/whatsapp-mac-mcp-without-business-api",
         permanent: true,
       },
+      {
+        source: "/t/whatsapp-mcp-without-business-api",
+        destination: "/t/whatsapp-mac-mcp-without-business-api",
+        permanent: true,
+      },
     ];
   },
 };
