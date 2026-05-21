@@ -8,7 +8,7 @@ import {
   ShineBorder,
   TerminalOutput,
   ComparisonTable,
-  AnimatedChecklist,
+  BentoGrid,
   RelatedPostsGrid,
   BookCallCTA,
   articleSchema,
@@ -90,55 +90,58 @@ const whatGetsStored = [
     title: "Delivered message bodies",
     description:
       "Deleted from Meta's servers once the recipient device acknowledges receipt. Per the privacy policy, this is the default for the overwhelming majority of traffic.",
+    size: "2x1" as const,
+    accent: true,
   },
   {
-    title: "Undelivered message bodies",
+    title: "Undelivered messages",
     description:
-      "Held encrypted on Meta's servers for up to 30 days while delivery is retried. After 30 days the encrypted blob is deleted. Meta cannot read the contents while the blob sits there because the keys live on your device.",
+      "Held encrypted on Meta's servers for up to 30 days while delivery is retried, then deleted. Meta cannot read the contents while the blob sits there because the keys live on your device.",
   },
   {
     title: "Forwarded media (briefly)",
     description:
-      "When you forward media to a new recipient, WhatsApp keeps a temporary encrypted copy on its servers to make subsequent forwards faster. Same encryption posture: Meta does not hold the key.",
+      "When you forward media, WhatsApp keeps a temporary encrypted copy on its servers to make subsequent forwards faster. Same encryption posture: Meta does not hold the key.",
   },
   {
     title: "Metadata (this is the part to actually worry about)",
     description:
       "Phone number, device info, IP address, who you messaged and when, group membership, last-seen, and connection logs. None of this is content, all of it is stored, and it is enough to reconstruct a social graph in detail.",
+    size: "2x1" as const,
   },
 ];
 
 const automationCompareRows = [
   {
     feature: "Where your plaintext message exists at send time",
-    product: "Only inside the official WhatsApp app on your Mac, briefly, before Signal Protocol encrypts it",
+    ours: "Only inside the official WhatsApp app on your Mac, briefly, before Signal Protocol encrypts it",
     competitor:
       "Inside the third-party server you sent it to, which encrypts and posts to Meta on your behalf",
   },
   {
     feature: "Number of parties that can log the plaintext",
-    product:
+    ours:
       "One: the WhatsApp client itself (your device, your control)",
     competitor:
       "Two or more: WhatsApp client plus the bot provider, plus any vendor they sit behind",
   },
   {
     feature: "Network calls the automation layer itself makes",
-    product:
+    ours:
       "Zero. The 1214-line main.swift has no URLSession, no http client, no telemetry pipe",
     competitor:
       "Many. Cloud API wrappers, hosted SaaS, and Web-protocol bots all post your messages to their own backend first",
   },
   {
     feature: "Compliance posture",
-    product:
+    ours:
       "Same posture as using WhatsApp Desktop yourself. No new processor added.",
     competitor:
       "Adds a new data processor under most privacy frameworks (GDPR, CCPA), with its own retention policy you have to read",
   },
   {
     feature: "Server-side logs you have to trust",
-    product:
+    ours:
       "Meta's, same as the official app. Nothing else added.",
     competitor:
       "Meta's, plus the vendor's, plus any infra the vendor sits on (AWS, GCP, downstream analytics).",
