@@ -174,39 +174,32 @@ const verifySteps = [
 
 const faqItems = [
   {
-    question: "Does Meta keep logs of my WhatsApp messages on its servers?",
-    answer:
-      "Per WhatsApp's privacy policy, delivered messages are deleted from Meta's servers. Undelivered messages are stored encrypted for up to 30 days then deleted. Content stays end-to-end encrypted via the Signal Protocol the whole time, so Meta cannot read message bodies even while the encrypted blob sits in its queue.",
+    q: "Does Meta keep logs of my WhatsApp messages on its servers?",
+    a: "Per WhatsApp's privacy policy, delivered messages are deleted from Meta's servers. Undelivered messages are stored encrypted for up to 30 days then deleted. Content stays end-to-end encrypted via the Signal Protocol the whole time, so Meta cannot read message bodies even while the encrypted blob sits in its queue.",
   },
   {
-    question: "Does that mean Meta knows nothing about my messages?",
-    answer:
-      "No. Meta does not see content, but it stores metadata: who you messaged and when, your IP address, device info, group memberships, last-seen, and connection logs. That is enough to build a detailed social graph. The privacy promise is content-only.",
+    q: "Does that mean Meta knows nothing about my messages?",
+    a: "No. Meta does not see content, but it stores metadata: who you messaged and when, your IP address, device info, group memberships, last-seen, and connection logs. That is enough to build a detailed social graph. The privacy promise is content-only.",
   },
   {
-    question: "What happens during the 30-day undelivered window?",
-    answer:
-      "The message sits on Meta's servers as a Signal Protocol ciphertext addressed to the recipient's device key. Meta retries delivery. If the recipient never comes online in 30 days, the encrypted blob is deleted. Nobody at Meta has the key to decrypt it during that window.",
+    q: "What happens during the 30-day undelivered window?",
+    a: "The message sits on Meta's servers as a Signal Protocol ciphertext addressed to the recipient's device key. Meta retries delivery. If the recipient never comes online in 30 days, the encrypted blob is deleted. Nobody at Meta has the key to decrypt it during that window.",
   },
   {
-    question: "If I use a WhatsApp automation tool, does that change the picture?",
-    answer:
-      "It depends entirely on the tool. A local accessibility shim like WhatsApp MCP runs on your Mac, drives the official desktop app, and adds zero new servers. A hosted bot platform or Cloud API wrapper sends your plaintext to their backend before forwarding to Meta, so you have added a second logging surface that does retain content.",
+    q: "If I use a WhatsApp automation tool, does that change the picture?",
+    a: "It depends entirely on the tool. A local accessibility shim like WhatsApp MCP runs on your Mac, drives the official desktop app, and adds zero new servers. A hosted bot platform or Cloud API wrapper sends your plaintext to their backend before forwarding to Meta, so you have added a second logging surface that does retain content.",
   },
   {
-    question: "How do I verify WhatsApp MCP itself does not log my messages?",
-    answer:
-      "Clone the repo at github.com/m13v/whatsapp-mcp-macos, open Sources/WhatsAppMCP/main.swift, and grep for URLSession, http, telemetry, analytics, fetch, or upload. All return zero matches across 1214 lines. The MCP server is a stdio process that talks to the macOS accessibility APIs and your local AI assistant. It has no socket to send messages anywhere.",
+    q: "How do I verify WhatsApp MCP itself does not log my messages?",
+    a: "Clone the repo at github.com/m13v/whatsapp-mcp-macos, open Sources/WhatsAppMCP/main.swift, and grep for URLSession, http, telemetry, analytics, fetch, or upload. All return zero matches across 1214 lines. The MCP server is a stdio process that talks to the macOS accessibility APIs and your local AI assistant. It has no socket to send messages anywhere.",
   },
   {
-    question: "Are encrypted backups in iCloud or Google Drive also unreadable to Meta?",
-    answer:
-      "Only if you enable end-to-end encrypted backups, which is a separate toggle in WhatsApp settings. With the toggle on, your backup is encrypted with a key derived from a 64-digit code or password that lives only on your device. Without it, the cloud provider holds the keys, not Meta, but the backup is not end-to-end encrypted.",
+    q: "Are encrypted backups in iCloud or Google Drive also unreadable to Meta?",
+    a: "Only if you enable end-to-end encrypted backups, which is a separate toggle in WhatsApp settings. With the toggle on, your backup is encrypted with a key derived from a 64-digit code or password that lives only on your device. Without it, the cloud provider holds the keys, not Meta, but the backup is not end-to-end encrypted.",
   },
   {
-    question: "Can law enforcement get my message content from Meta?",
-    answer:
-      "Meta can hand over what it has, which is metadata plus any undelivered ciphertext in the 30-day window. It cannot decrypt that ciphertext. The places content has historically been recovered are the endpoints: an unlocked phone, an unencrypted iCloud backup, a screenshot.",
+    q: "Can law enforcement get my message content from Meta?",
+    a: "Meta can hand over what it has, which is metadata plus any undelivered ciphertext in the 30-day window. It cannot decrypt that ciphertext. The places content has historically been recovered are the endpoints: an unlocked phone, an unencrypted iCloud backup, a screenshot.",
   },
 ];
 
@@ -339,7 +332,7 @@ export default function WhatsappMessageLogsMetaServersPage() {
             is different. Most posts on this lump them together and end up
             either too alarmist or too reassuring. The honest breakdown:
           </p>
-          <AnimatedChecklist title="" items={whatGetsStored} />
+          <BentoGrid cards={whatGetsStored} />
         </section>
 
         {/* The 30-day window */}
