@@ -13,6 +13,9 @@ export function Footer() {
           <p className="mt-3 max-w-xs text-sm text-zinc-600">
             MCP server that drives the native WhatsApp desktop app on macOS through accessibility APIs.
           </p>
+          <p className="mt-3 max-w-xs text-xs leading-relaxed text-zinc-500">
+            Independent open-source project. Not affiliated with WhatsApp LLC or Meta Platforms.
+          </p>
         </div>
 
         <div>
@@ -22,6 +25,7 @@ export function Footer() {
             <li><Link href="/precall" className="text-zinc-700 hover:text-zinc-900">Book a call</Link></li>
             <li><Link href="/faq" className="text-zinc-700 hover:text-zinc-900">FAQ</Link></li>
             <li><Link href="/t" className="text-zinc-700 hover:text-zinc-900">Guides</Link></li>
+            <li><Link href="/safety" className="text-zinc-700 hover:text-zinc-900">Safety</Link></li>
             <li>
               <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="text-zinc-700 hover:text-zinc-900">
                 GitHub
@@ -44,7 +48,7 @@ export function Footer() {
 
       <div className="border-t border-zinc-200">
         <div className="mx-auto max-w-5xl px-5 py-5 text-xs text-zinc-500">
-          &copy; {new Date().getFullYear()} WhatsApp MCP for macOS. Open source on GitHub.
+          &copy; {new Date().getFullYear()} WhatsApp MCP for macOS. Open source on GitHub. WhatsApp is a trademark of its owner.
         </div>
       </div>
     </footer>
