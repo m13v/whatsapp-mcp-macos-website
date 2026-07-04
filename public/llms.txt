@@ -2,6 +2,8 @@
 
 > MCP server that lets AI assistants control the native WhatsApp desktop app on macOS through accessibility APIs. Search contacts, send messages, read chats, and navigate the app programmatically.
 
+WhatsApp MCP for macOS is an independent open-source project. It is not affiliated with, endorsed by, or sponsored by WhatsApp LLC or Meta Platforms. The project never asks users for a WhatsApp password, QR code, Meta credentials, payment details, browser cookies, session files, or recovery codes.
+
 ## What It Is
 
 WhatsApp MCP is a Model Context Protocol (MCP) server written in Swift. It communicates over stdio and exposes 11 tools that give AI assistants (Claude, etc.) full control over WhatsApp on macOS. Instead of using the WhatsApp Web API or any unofficial REST endpoints, it drives the native WhatsApp Catalyst app directly through macOS Accessibility (AX) APIs and CGEvent-based input simulation.
