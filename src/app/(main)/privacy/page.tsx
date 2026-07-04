@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Privacy",
   description:
-    "What WhatsApp MCP for macOS does and does not do with your data. Local-only execution, no telemetry by default, optional analytics on this marketing site.",
+    "What WhatsApp MCP for macOS does and does not do with your data. Local-only execution, no telemetry, no credential collection, and no email-gated installer.",
   alternates: { canonical: "/privacy" },
 };
 
@@ -36,15 +36,15 @@ export default function PrivacyPage() {
 
         <h2 className="mt-8 text-lg font-semibold text-zinc-900">This marketing website</h2>
         <p className="mt-3 text-sm leading-relaxed text-zinc-600">
-          The site you&rsquo;re reading uses PostHog (anonymized pageviews, button clicks) to
-          understand which guides are useful. If you book a call through Cal.com, your name, email,
-          and timezone go to Cal.com so we can put a meeting on the calendar.
+          The site you&rsquo;re reading does not ask for an email address to reveal install steps
+          and does not load a behavioral analytics SDK. If you book a call through Cal.com, your
+          name, email, and timezone go to Cal.com so we can put a meeting on the calendar.
         </p>
 
         <h2 className="mt-8 text-lg font-semibold text-zinc-900">What we don&rsquo;t do</h2>
         <ul className="mt-3 space-y-2 text-sm leading-relaxed text-zinc-600">
           <li>We don&rsquo;t sell your data.</li>
-          <li>We don&rsquo;t share newsletter subscribers with anyone.</li>
+          <li>We don&rsquo;t operate an email-gated installer or newsletter signup flow.</li>
           <li>We don&rsquo;t fingerprint or cross-site track you.</li>
         </ul>
 
