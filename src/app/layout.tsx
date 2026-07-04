@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { HeadingAnchors, FullSiteAnalytics } from "@seo/components";
+import { HeadingAnchors } from "@seo/components";
 import { SiteSidebar } from "@/components/site-sidebar";
 import "./globals.css";
-import { SeoEngagement } from "./seo-engagement";
 
 export const metadata: Metadata = {
   title: {
@@ -91,17 +90,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-white text-zinc-900 antialiased">
-        <FullSiteAnalytics
-          posthogKey={process.env.NEXT_PUBLIC_POSTHOG_KEY}
-          posthogHost={process.env.NEXT_PUBLIC_POSTHOG_HOST}
-        >
-          <HeadingAnchors />
-          <div className="flex min-h-screen">
-            <SiteSidebar />
-            <div className="flex min-w-0 flex-1 flex-col">{children}
-            <SeoEngagement /></div>
-          </div>
-        </FullSiteAnalytics>
+        <HeadingAnchors />
+        <div className="flex min-h-screen">
+          <SiteSidebar />
+          <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+        </div>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
