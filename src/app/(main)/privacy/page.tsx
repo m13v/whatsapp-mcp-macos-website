@@ -17,6 +17,14 @@ export default function PrivacyPage() {
       <p className="mt-2 text-sm text-zinc-500">Last updated: 2026-04-27</p>
 
       <div className="prose prose-zinc mt-10 max-w-none">
+        <h2 className="mt-8 text-lg font-semibold text-zinc-900">Affiliation and credentials</h2>
+        <p className="mt-3 text-sm leading-relaxed text-zinc-600">
+          WhatsApp MCP for macOS is an independent open-source project. It is not affiliated with,
+          endorsed by, or sponsored by WhatsApp LLC or Meta Platforms. The site and MCP server never
+          ask for your WhatsApp password, QR code, Meta credentials, payment details, browser
+          cookies, session files, or recovery codes.
+        </p>
+
         <h2 className="mt-8 text-lg font-semibold text-zinc-900">The MCP server itself</h2>
         <p className="mt-3 text-sm leading-relaxed text-zinc-600">
           The WhatsApp MCP server runs entirely on your Mac. It reads the macOS Accessibility tree
@@ -29,9 +37,8 @@ export default function PrivacyPage() {
         <h2 className="mt-8 text-lg font-semibold text-zinc-900">This marketing website</h2>
         <p className="mt-3 text-sm leading-relaxed text-zinc-600">
           The site you&rsquo;re reading uses PostHog (anonymized pageviews, button clicks) to
-          understand which guides are useful, and Resend for the optional newsletter and contact
-          form. If you book a call through Cal.com, your name, email, and timezone go to Cal.com so
-          we can put a meeting on the calendar.
+          understand which guides are useful. If you book a call through Cal.com, your name, email,
+          and timezone go to Cal.com so we can put a meeting on the calendar.
         </p>
 
         <h2 className="mt-8 text-lg font-semibold text-zinc-900">What we don&rsquo;t do</h2>
