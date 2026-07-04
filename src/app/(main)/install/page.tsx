@@ -1,14 +1,44 @@
 import type { Metadata } from "next";
 import { BookCallLink } from "@/components/BookCallLink";
-import { GetStartedEmailGate } from "@/components/GetStartedEmailGate";
-import { GITHUB_URL } from "@/lib/get-started";
+import { TrustNotice } from "@/components/TrustNotice";
+import { GITHUB_URL, NPM_INSTALL_CMD } from "@/lib/get-started";
 
 export const metadata: Metadata = {
   title: "Install",
   description:
-    "Install the WhatsApp MCP server on macOS. Single npm command, Swift postinstall, then register the server in Claude Desktop, Claude Code, Cursor, or any MCP client.",
+    "Install the WhatsApp MCP server on macOS. Public npm command, Swift postinstall, then register the local stdio server in Claude Desktop, Claude Code, Cursor, or any MCP client.",
   alternates: { canonical: "/install" },
 };
+
+const STDIO_CONFIG = `{
+  "mcpServers": {
+    "whatsapp": {
+      "command": "whatsapp-mcp-macos",
+      "transport": "stdio"
+    }
+  }
+}`;
+
+const VSCODE_CONFIG = `{
+  "servers": {
+    "whatsapp": {
+      "command": "whatsapp-mcp-macos",
+      "transport": "stdio"
+    }
+  }
+}`;
+
+const CONFIG_FILES = [
+  { client: "Claude Code", path: "~/.claude.json", config: STDIO_CONFIG },
+  {
+    client: "Claude Desktop",
+    path: "~/Library/Application Support/Claude/claude_desktop_config.json",
+    config: STDIO_CONFIG,
+  },
+  { client: "Cursor", path: "~/.cursor/mcp.json", config: STDIO_CONFIG },
+  { client: "VS Code", path: "~/Library/Application Support/Code/User/mcp.json", config: VSCODE_CONFIG },
+  { client: "Windsurf", path: "~/.codeium/windsurf/mcp_config.json", config: STDIO_CONFIG },
+];
 
 export default function InstallPage() {
   return (
@@ -21,15 +51,16 @@ export default function InstallPage() {
         macOS 13+ with the WhatsApp desktop app installed. Node.js 20+ for the npm install. Xcode
         Command Line Tools for the Swift compile.
       </p>
+      <TrustNotice className="mt-6" />
 
       <div className="mt-10 rounded-lg border border-zinc-200 bg-zinc-50 p-6">
-        <h2 className="text-base font-semibold text-zinc-900">Drop your email and we&rsquo;ll send the install command</h2>
+        <h2 className="text-base font-semibold text-zinc-900">Public install command</h2>
         <p className="mt-2 text-sm text-zinc-600">
-          The one-line install plus the JSON config for Claude Code, Claude Desktop, Cursor, VS Code, and Windsurf land in your inbox in under a minute. No spam.
+          You do not need to enter an email address to install or inspect the project.
         </p>
-        <div className="mt-4">
-          <GetStartedEmailGate label="Email me the install" section="install-page" variant="primary" />
-        </div>
+        <pre className="mt-4 overflow-x-auto rounded-md border border-zinc-200 bg-white p-4 text-sm text-zinc-900">
+          <code>{NPM_INSTALL_CMD}</code>
+        </pre>
       </div>
 
       <ol className="mt-12 space-y-12">
@@ -38,9 +69,9 @@ export default function InstallPage() {
           <h2 className="mt-2 text-lg font-semibold text-zinc-900">Install the npm package</h2>
           <p className="mt-3 text-sm text-zinc-600">
             The postinstall script runs <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs">xcrun swift build -c release</code>{" "}
-            to compile the Swift binary. First install takes ~30 seconds. The exact{" "}
-            <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs">npm install</code>{" "}
-            line lands in your inbox once you submit your email above.
+            to compile the Swift binary. First install takes about 30 seconds. The package is open
+            source, and the npm wrapper launches a local stdio process named{" "}
+            <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs">whatsapp-mcp-macos</code>.
           </p>
         </li>
 
@@ -64,16 +95,28 @@ export default function InstallPage() {
           <p className="font-mono text-xs text-teal-600">03</p>
           <h2 className="mt-2 text-lg font-semibold text-zinc-900">Register the MCP server</h2>
           <p className="mt-3 text-sm leading-relaxed text-zinc-600">
-            Drop the JSON config from the welcome email into{" "}
+            Drop the JSON config from this page into{" "}
             <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs">~/.claude.json</code>{" "}
             (Claude Code) or the equivalent file for your MCP client. Restart the client. The
             WhatsApp MCP server should appear in the available tool list.
           </p>
-          <p className="mt-3 text-sm leading-relaxed text-zinc-500">
-            We send the exact JSON for Claude Code, Claude Desktop, Cursor, VS Code, and Windsurf
-            once you submit your email above. Configs differ only by file path; the server entry
-            is identical.
-          </p>
+          <div className="mt-5 space-y-5">
+            {CONFIG_FILES.map((item) => (
+              <div key={item.client}>
+                <h3 className="text-sm font-semibold text-zinc-900">{item.client}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-zinc-600">
+                  Edit{" "}
+                  <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs text-zinc-800">
+                    {item.path}
+                  </code>{" "}
+                  and add:
+                </p>
+                <pre className="mt-2 overflow-x-auto rounded-md border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-900">
+                  <code>{item.config}</code>
+                </pre>
+              </div>
+            ))}
+          </div>
         </li>
 
         <li>
