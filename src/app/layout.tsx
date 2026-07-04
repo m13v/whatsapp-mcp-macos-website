@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { HeadingAnchors, FullSiteAnalytics, FounderChatPanel } from "@seo/components";
+import { HeadingAnchors, FullSiteAnalytics } from "@seo/components";
 import { SiteSidebar } from "@/components/site-sidebar";
-import { GuideChat } from "@/components/guide-chat";
 import "./globals.css";
 import { SeoEngagement } from "./seo-engagement";
 
@@ -101,9 +100,7 @@ export default function RootLayout({
             <SiteSidebar />
             <div className="flex min-w-0 flex-1 flex-col">{children}
             <SeoEngagement /></div>
-            <GuideChat />
           </div>
-          <FounderChatPanel project="WhatsApp MCP" />
         </FullSiteAnalytics>
         <script
           type="application/ld+json"
