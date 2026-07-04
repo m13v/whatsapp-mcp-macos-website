@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BookCallLink } from "@/components/BookCallLink";
 import { GetStartedEmailGate } from "@/components/GetStartedEmailGate";
+import { TrustNotice } from "@/components/TrustNotice";
 import { GITHUB_URL } from "@/lib/get-started";
 
 export const metadata: Metadata = {
@@ -25,12 +26,12 @@ const features = [
   {
     title: "Single npm install",
     body:
-      "One command. Postinstall compiles the Swift binary; the MCP server registers via stdio in your client config. No Docker, no daemons.",
+      "One public npm command. Postinstall compiles the Swift binary; the MCP server registers via stdio in your client config. No Docker, no daemons.",
   },
   {
     title: "Local and private",
     body:
-      "Runs entirely on your Mac. Messages stay in WhatsApp; nothing routes through third-party infrastructure. You control the accessibility permission.",
+      "Runs entirely on your Mac. Messages stay in WhatsApp; nothing routes through third-party infrastructure. No WhatsApp password, QR code, or Meta credential is requested.",
   },
 ];
 
@@ -38,7 +39,7 @@ const steps = [
   {
     n: "01",
     title: "Install the npm package",
-    body: "One global npm install. The postinstall script compiles the Swift binary in release mode. We email the exact command after you sign up.",
+    body: "One global npm install. The public command is on the install page, and the postinstall script compiles the Swift binary in release mode.",
   },
   {
     n: "02",
@@ -48,7 +49,7 @@ const steps = [
   {
     n: "03",
     title: "Register the MCP server",
-    body: "Drop a single JSON block into your MCP client's config and restart it. The exact snippet for Claude Code, Claude Desktop, Cursor, VS Code, and Windsurf lands in your inbox.",
+    body: "Drop a single JSON block into your MCP client's config and restart it. The snippets for Claude Code, Claude Desktop, Cursor, VS Code, and Windsurf are published on the install page.",
   },
   {
     n: "04",
@@ -58,6 +59,14 @@ const steps = [
 ];
 
 const faqs = [
+  {
+    q: "Is this affiliated with WhatsApp or Meta?",
+    a: "No. WhatsApp MCP for macOS is an independent open-source project. It is not affiliated with, endorsed by, or sponsored by WhatsApp LLC or Meta Platforms.",
+  },
+  {
+    q: "Will this ask for my WhatsApp password or QR code?",
+    a: "No. The MCP server never asks for your WhatsApp password, QR code, Meta credentials, payment details, or session files. It only drives the official WhatsApp desktop app already signed in on your Mac.",
+  },
   {
     q: "Does this use the WhatsApp Business API?",
     a: "No. It drives the native macOS WhatsApp desktop app through accessibility APIs. There are no Meta API keys, no webhook setup, no opt-in template approval. The tradeoff: it's a personal-account automation tool, not a high-volume broadcast pipeline.",
@@ -123,9 +132,10 @@ export default function HomePage() {
             messages, and read chats in the native WhatsApp desktop app on macOS. No Meta Business
             API. No browser automation. One npm install.
           </p>
+          <TrustNotice className="mt-6 max-w-3xl" />
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <GetStartedEmailGate label="Get the install command" section="hero" variant="primary" />
+            <GetStartedEmailGate label="Install from npm" section="hero" variant="primary" />
             <BookCallLink
               section="hero"
               className="inline-flex items-center justify-center rounded-md border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-800 transition-colors hover:border-zinc-400"
@@ -173,7 +183,7 @@ export default function HomePage() {
             ))}
           </div>
           <div className="mt-10 flex flex-wrap gap-3">
-            <GetStartedEmailGate label="Get the install command" section="how-it-works" variant="primary" />
+            <GetStartedEmailGate label="View install steps" section="how-it-works" variant="primary" />
             <a
               href={GITHUB_URL}
               target="_blank"
@@ -221,7 +231,7 @@ export default function HomePage() {
             One install. One config block. Your assistant talks to WhatsApp like you do.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <GetStartedEmailGate label="Get the install command" section="final-cta" variant="primary" />
+            <GetStartedEmailGate label="Install from npm" section="final-cta" variant="primary" />
             <BookCallLink
               section="final-cta"
               className="inline-flex items-center justify-center rounded-md border border-zinc-300 px-6 py-3 text-sm font-medium text-zinc-800 transition-colors hover:border-zinc-400"
