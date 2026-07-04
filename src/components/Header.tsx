@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { BookCallLink } from "@/components/BookCallLink";
 import { GetStartedEmailGate } from "@/components/GetStartedEmailGate";
-import { GITHUB_URL } from "@/lib/get-started";
+import { GITHUB_URL } from "@/lib/project-links";
 
 const navLinks = [
   { href: "/faq", label: "FAQ" },

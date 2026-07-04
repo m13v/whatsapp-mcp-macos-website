@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { BookCallLink } from "@/components/BookCallLink";
 import { GetStartedLink } from "@/components/GetStartedLink";
-import { GITHUB_URL } from "@/lib/get-started";
+import { GITHUB_URL } from "@/lib/project-links";
 
 export const metadata: Metadata = {
   title: "Book a call",

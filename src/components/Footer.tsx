@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GITHUB_URL } from "@/lib/get-started";
+import { GITHUB_URL } from "@/lib/project-links";
 
 export function Footer() {
   return (

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { GET_STARTED_URL, fireGetStartedClick } from "@/lib/get-started";
+import { GET_STARTED_URL } from "@/lib/project-links";
+import { fireGetStartedClick } from "@/lib/get-started";
 
 export function GetStartedLink({
   children,

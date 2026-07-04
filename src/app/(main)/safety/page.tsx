@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { GITHUB_URL, NPM_INSTALL_CMD } from "@/lib/get-started";
+import { GITHUB_URL, NPM_INSTALL_CMD } from "@/lib/project-links";
 
 export const metadata: Metadata = {
   title: "Safety",

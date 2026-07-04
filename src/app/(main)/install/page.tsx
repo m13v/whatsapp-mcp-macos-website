@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { BookCallLink } from "@/components/BookCallLink";
 import { TrustNotice } from "@/components/TrustNotice";
-import { GITHUB_URL, NPM_INSTALL_CMD } from "@/lib/get-started";
+import { GITHUB_URL, NPM_INSTALL_CMD } from "@/lib/project-links";
 
 export const metadata: Metadata = {
   title: "Install",

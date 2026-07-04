@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BookCallLink } from "@/components/BookCallLink";
 import { GetStartedEmailGate } from "@/components/GetStartedEmailGate";
 import { TrustNotice } from "@/components/TrustNotice";
-import { GITHUB_URL } from "@/lib/get-started";
+import { GITHUB_URL } from "@/lib/project-links";
 
 export const metadata: Metadata = {
   title: { absolute: "WhatsApp MCP for macOS — drive WhatsApp from Claude, Cursor, or any MCP client" },
