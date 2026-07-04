@@ -9,6 +9,7 @@ import { GITHUB_URL } from "@/lib/get-started";
 const navLinks = [
   { href: "/faq", label: "FAQ" },
   { href: "/t", label: "Guides" },
+  { href: "/safety", label: "Safety" },
 ];
 
 export function Header() {
