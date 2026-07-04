@@ -9,6 +9,14 @@ export const metadata: Metadata = {
 
 const faqs = [
   {
+    q: "Is this affiliated with WhatsApp or Meta?",
+    a: "No. WhatsApp MCP for macOS is an independent open-source project. It is not affiliated with, endorsed by, or sponsored by WhatsApp LLC or Meta Platforms. The name describes interoperability with the WhatsApp desktop app.",
+  },
+  {
+    q: "Will you ask for my WhatsApp password, QR code, or Meta credentials?",
+    a: "No. The site and MCP server never ask for your WhatsApp password, QR code, Meta credentials, payment details, browser cookies, session files, or recovery codes. The server operates the official WhatsApp desktop app that is already signed in on your Mac.",
+  },
+  {
     q: "What is an MCP server?",
     a: "Model Context Protocol is the open standard Anthropic shipped for letting LLMs call external tools. An MCP server runs on your machine, exposes a set of tools over stdio (or sse), and the AI client calls them when the model decides to. WhatsApp MCP exposes 11 tools that map to common WhatsApp actions — search contacts, open a chat, read messages, send a message, navigate UI.",
   },
@@ -39,6 +47,10 @@ const faqs = [
   {
     q: "Is it open source?",
     a: "Yes. MIT-licensed, full source on GitHub at github.com/m13v/whatsapp-mcp-macos. The npm package is a thin wrapper that compiles the Swift binary at install time.",
+  },
+  {
+    q: "Why does macOS Accessibility permission appear in the setup?",
+    a: "macOS requires Accessibility permission before one app can read and operate another app's interface. The permission belongs to the host app that launches the MCP server, such as Claude Desktop, Terminal, Cursor, or Windsurf. You can revoke it any time in System Settings.",
   },
   {
     q: "How do I uninstall?",
